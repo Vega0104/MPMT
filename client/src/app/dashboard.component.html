@@ -1,0 +1,128 @@
+<!-- dashboard.component.html -->
+<div class="flex h-screen bg-gray-100">
+  <!-- Sidebar -->
+  <aside class="w-64 bg-white border-r flex flex-col">
+    <div class="text-2xl font-bold p-6 border-b">MPMT</div>
+    <nav class="flex-1 p-4 space-y-4">
+      <a href="#" class="block py-2 px-4 rounded hover:bg-gray-200">Dashboard</a>
+      <a href="#" class="block py-2 px-4 rounded hover:bg-gray-200">Projects</a>
+      <a href="#" class="block py-2 px-4 rounded hover:bg-gray-200">Tasks</a>
+      <a href="#" class="block py-2 px-4 rounded hover:bg-gray-200">Team</a>
+    </nav>
+    <div class="p-4 border-t text-sm text-gray-500">Logged as: <b>John Doe</b></div>
+  </aside>
+
+  <!-- Main content -->
+  <main class="flex-1 flex flex-col">
+    <!-- Header -->
+    <header class="flex items-center justify-between px-8 py-4 bg-white shadow">
+      <h1 class="text-2xl font-semibold">Dashboard</h1>
+      <button class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium shadow">
+        + New Project
+      </button>
+    </header>
+
+    <div class="flex-1 flex px-8 py-6 space-x-6 overflow-auto">
+      <!-- Main Dashboard Area -->
+      <section class="flex-1 space-y-8">
+        <!-- Projects Overview -->
+        <div>
+          <h2 class="text-xl font-bold mb-3">Your Projects</h2>
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <!-- Example project card -->
+            <div class="bg-white p-4 rounded-lg shadow border">
+              <div class="font-semibold text-lg mb-2">Project A</div>
+              <div class="text-sm text-gray-500 mb-2">8 tasks • 2 members</div>
+              <div class="w-full bg-gray-200 rounded-full h-2 mb-2">
+                <div class="bg-blue-500 h-2 rounded-full" style="width: 40%"></div>
+              </div>
+              <div class="flex justify-between items-center">
+                <span class="text-xs text-gray-400">Progress: 40%</span>
+                <button class="text-blue-600 text-xs hover:underline">Details</button>
+              </div>
+            </div>
+            <!-- ...Repeat for each project... -->
+            <div class="bg-white p-4 rounded-lg shadow border">
+              <div class="font-semibold text-lg mb-2">Project A</div>
+              <div class="text-sm text-gray-500 mb-2">8 tasks • 2 members</div>
+              <div class="w-full bg-gray-200 rounded-full h-2 mb-2">
+                <div class="bg-blue-500 h-2 rounded-full" style="width: 40%"></div>
+              </div>
+              <div class="flex justify-between items-center">
+                <span class="text-xs text-gray-400">Progress: 40%</span>
+                <button class="text-blue-600 text-xs hover:underline">Details</button>
+              </div>
+            </div>
+            <!-- ...Repeat for each project... -->
+            <div class="bg-white p-4 rounded-lg shadow border">
+              <div class="font-semibold text-lg mb-2">Project A</div>
+              <div class="text-sm text-gray-500 mb-2">8 tasks • 2 members</div>
+              <div class="w-full bg-gray-200 rounded-full h-2 mb-2">
+                <div class="bg-blue-500 h-2 rounded-full" style="width: 40%"></div>
+              </div>
+              <div class="flex justify-between items-center">
+                <span class="text-xs text-gray-400">Progress: 40%</span>
+                <button class="text-blue-600 text-xs hover:underline">Details</button>
+              </div>
+            </div>
+            <!-- ...Repeat for each project... -->
+            <div class="bg-white p-4 rounded-lg shadow border">
+              <div class="font-semibold text-lg mb-2">Project A</div>
+              <div class="text-sm text-gray-500 mb-2">8 tasks • 2 members</div>
+              <div class="w-full bg-gray-200 rounded-full h-2 mb-2">
+                <div class="bg-blue-500 h-2 rounded-full" style="width: 40%"></div>
+              </div>
+              <div class="flex justify-between items-center">
+                <span class="text-xs text-gray-400">Progress: 40%</span>
+                <button class="text-blue-600 text-xs hover:underline">Details</button>
+              </div>
+            </div>
+            <!-- ...Repeat for each project... -->
+            <div class="bg-white p-4 rounded-lg shadow border">
+              <div class="font-semibold text-lg mb-2">Project A</div>
+              <div class="text-sm text-gray-500 mb-2">8 tasks • 2 members</div>
+              <div class="w-full bg-gray-200 rounded-full h-2 mb-2">
+                <div class="bg-blue-500 h-2 rounded-full" style="width: 40%"></div>
+              </div>
+              <div class="flex justify-between items-center">
+                <span class="text-xs text-gray-400">Progress: 40%</span>
+                <button class="text-blue-600 text-xs hover:underline">Details</button>
+              </div>
+            </div>
+            <!-- ...Repeat for each project... -->
+          </div>
+        </div>
+
+        <!-- Tasks List -->
+        <div>
+          <h2 class="text-xl font-bold mb-3">Upcoming Tasks</h2>
+          <div class="bg-white rounded-lg shadow divide-y">
+            <div class="flex items-center justify-between px-4 py-3">
+              <span class="font-medium">Task 1</span>
+              <span class="text-xs text-gray-500">Due: 2025-08-02</span>
+              <span class="px-2 py-1 rounded bg-yellow-100 text-yellow-700 text-xs">In progress</span>
+            </div>
+            <div class="flex items-center justify-between px-4 py-3">
+              <span class="font-medium">Task 2</span>
+              <span class="text-xs text-gray-500">Due: 2025-08-03</span>
+              <span class="px-2 py-1 rounded bg-green-100 text-green-700 text-xs">Done</span>
+            </div>
+            <!-- ...Repeat for each task... -->
+          </div>
+        </div>
+      </section>
+
+      <!-- Notifications -->
+      <aside class="w-80 space-y-4">
+        <div class="bg-white rounded-lg shadow p-4">
+          <h3 class="font-semibold text-lg mb-2">Notifications</h3>
+          <ul class="space-y-2">
+            <li class="text-sm text-gray-700">[2025-07-30] Task "Design" updated by Alice.</li>
+            <li class="text-sm text-gray-700">[2025-07-29] New project created: "Website".</li>
+            <!-- ... -->
+          </ul>
+        </div>
+      </aside>
+    </div>
+  </main>
+</div>

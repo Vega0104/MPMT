@@ -1,0 +1,25 @@
+# --- OS / IDE ---
+.DS_Store
+.idea/
+*.iml
+
+# --- Secrets/env ---
+.env
+
+# --- Node / Angular (client) ---
+client/node_modules/
+client/dist/
+client/.angular/
+client/.cache/
+client/npm-debug.log*
+client/yarn-error.log*
+
+# --- Java / Maven (server) ---
+server/target/
+server/.mvn/wrapper/maven-wrapper.jar
+server/.classpath
+server/.project
+server/.settings/
+
+# runtime-only
+client/env.js
