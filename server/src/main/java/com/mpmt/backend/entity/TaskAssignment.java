@@ -3,7 +3,7 @@ package com.mpmt.backend.entity;
 import jakarta.persistence.*;
 
 @Entity
-@Table(name = "task_assignments")
+@Table(name = "task_assignment")
 public class TaskAssignment {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

@@ -1,5 +1,7 @@
 package com.mpmt.backend.service;
 
+import com.mpmt.backend.entity.PriorityType;
+import com.mpmt.backend.entity.StatusType;
 import com.mpmt.backend.entity.Task;
 import com.mpmt.backend.repository.TaskRepository;
 import org.junit.jupiter.api.Test;
@@ -31,8 +33,10 @@ class TaskServiceTest {
     void testCreateAndGetTask() {
         Task task = new Task();
         task.setName("Mock Tâche");
-        task.setPriority("HIGH");
-        task.setStatus("TODO");
+//        task.setPriority("HIGH");
+//        task.setStatus("TODO");
+        task.setPriority(PriorityType.MEDIUM);
+        task.setStatus(StatusType.TODO);
         task.setCreatedBy(1L);
         task.setProjectId(1L);
 

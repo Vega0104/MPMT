@@ -21,12 +21,12 @@ class ProjectMemberTest {
         project.setId(2L);
         project.setName("TestProject");
 
-        pm.setRole(RoleType.ADMINISTRATOR);
+        pm.setRole(RoleType.ADMIN);
         pm.setUser(user);
         pm.setProject(project);
 
         assertThat(pm.getId()).isEqualTo(10L);
-        assertThat(pm.getRole()).isEqualTo(RoleType.ADMINISTRATOR);
+        assertThat(pm.getRole()).isEqualTo(RoleType.ADMIN);
         assertThat(pm.getUser().getUsername()).isEqualTo("testuser");
         assertThat(pm.getProject().getName()).isEqualTo("TestProject");
     }

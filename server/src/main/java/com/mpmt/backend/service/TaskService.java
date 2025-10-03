@@ -1,5 +1,6 @@
 package com.mpmt.backend.service;
 
+import com.mpmt.backend.entity.StatusType;
 import com.mpmt.backend.entity.Task;
 import com.mpmt.backend.repository.TaskRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,5 +40,9 @@ public class TaskService {
 
     public Task updateTask(Task task) {
         return taskRepository.save(task);
+    }
+
+    public List<Task> getTasksByProjectIdAndStatus(Long projectId, StatusType status) {
+        return taskRepository.findByProjectIdAndStatus(projectId, status);
     }
 }

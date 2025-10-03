@@ -1,6 +1,8 @@
 package com.mpmt.backend.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.mpmt.backend.entity.PriorityType;
+import com.mpmt.backend.entity.StatusType;
 import com.mpmt.backend.entity.Task;
 import com.mpmt.backend.service.TaskService;
 import org.junit.jupiter.api.Test;
@@ -37,8 +39,10 @@ class TaskControllerTest {
         Task task = new Task();
         task.setId(1L);
         task.setName("Tâche API");
-        task.setPriority("HIGH");
-        task.setStatus("TODO");
+//        task.setPriority("HIGH");
+//        task.setStatus("TODO");
+        task.setPriority(PriorityType.HIGH);
+        task.setStatus(StatusType.TODO);
         task.setCreatedBy(1L);
         task.setProjectId(1L);
 

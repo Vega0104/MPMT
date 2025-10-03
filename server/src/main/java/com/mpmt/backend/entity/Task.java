@@ -18,19 +18,21 @@ public class Task {
     private LocalDate dueDate;
     private LocalDate endDate;
 
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private String priority; // à remplacer plus tard par enum PriorityType
+    private PriorityType priority;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private StatusType status;
 
     @Column(nullable = false)
-    private String status;   // à remplacer plus tard par enum StatusType
-
-    @Column(nullable = false)
-    private Long createdBy;  // User ID
+    private Long createdBy;
 
     @Column(nullable = false)
     private Long projectId;
 
-    // Getters et setters...
+    // Getters et setters
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 
@@ -46,11 +48,11 @@ public class Task {
     public LocalDate getEndDate() { return endDate; }
     public void setEndDate(LocalDate endDate) { this.endDate = endDate; }
 
-    public String getPriority() { return priority; }
-    public void setPriority(String priority) { this.priority = priority; }
+    public PriorityType getPriority() { return priority; }
+    public void setPriority(PriorityType priority) { this.priority = priority; }
 
-    public String getStatus() { return status; }
-    public void setStatus(String status) { this.status = status; }
+    public StatusType getStatus() { return status; }
+    public void setStatus(StatusType status) { this.status = status; }
 
     public Long getCreatedBy() { return createdBy; }
     public void setCreatedBy(Long createdBy) { this.createdBy = createdBy; }

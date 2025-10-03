@@ -1,7 +1,9 @@
 package com.mpmt.backend.controller;
 
+import com.mpmt.backend.DTO.ProjectStats;
 import com.mpmt.backend.entity.Project;
 import com.mpmt.backend.entity.ProjectMember;
+import com.mpmt.backend.entity.StatusType;
 import com.mpmt.backend.entity.Task;
 import com.mpmt.backend.service.ProjectService;
 import com.mpmt.backend.service.ProjectMemberService;
@@ -79,6 +81,31 @@ public class ProjectController {
         return ResponseEntity.ok(tasks);
     }
 
+    @GetMapping("/{id}/stats")
+    public ResponseEntity<ProjectStats> getProjectStats(@PathVariable Long id) {
+        List<Task> tasks = taskService.getTasksByProjectId(id);
+
+        if (tasks.isEmpty()) {
+            ProjectStats emptyStats = new ProjectStats();
+            emptyStats.setTotalTasks(0);
+            emptyStats.setProgress(0);
+            return ResponseEntity.ok(emptyStats);
+        }
+
+        long todo = tasks.stream().filter(t -> t.getStatus() == StatusType.TODO).count();
+        long inProgress = tasks.stream().filter(t -> t.getStatus() == StatusType.IN_PROGRESS).count();
+        long done = tasks.stream().filter(t -> t.getStatus() == StatusType.DONE).count();
+
+        ProjectStats stats = new ProjectStats();
+        stats.setTotalTasks(tasks.size());
+        stats.setTodoCount(todo);
+        stats.setInProgressCount(inProgress);
+        stats.setDoneCount(done);
+        stats.setProgress((int) ((done * 100.0) / tasks.size()));
+
+        return ResponseEntity.ok(stats);
+    }
+
 
     @PostMapping("/{id}/tasks")
     public ResponseEntity<Task> createTaskForProject(@PathVariable Long id, @RequestBody Task task) {
@@ -105,6 +132,7 @@ public class ProjectController {
         Project savedProject = projectService.updateProject(existingProject);
         return ResponseEntity.ok(savedProject);
     }
+
 
 
 

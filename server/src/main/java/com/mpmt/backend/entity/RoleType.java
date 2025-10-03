@@ -1,7 +1,7 @@
 package com.mpmt.backend.entity;
 
 public enum RoleType {
-    ADMINISTRATOR,
+    ADMIN,
     MEMBER,
     OBSERVER
 }

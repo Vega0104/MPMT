@@ -4,7 +4,7 @@ import jakarta.persistence.*;
 import java.util.Date;
 
 @Entity
-@Table(name = "task_histories")
+@Table(name = "task_history")
 public class TaskHistory {
 
     @Id

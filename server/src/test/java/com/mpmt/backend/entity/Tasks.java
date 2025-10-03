@@ -15,8 +15,10 @@ class TaskTest {
         task.setDescription("Desc test");
         task.setDueDate(LocalDate.of(2025, 7, 3));
         task.setEndDate(LocalDate.of(2025, 7, 4));
-        task.setPriority("HIGH");
-        task.setStatus("TODO");
+//        task.setPriority("HIGH");
+//        task.setStatus("TODO");
+        task.setPriority(PriorityType.MEDIUM);
+        task.setStatus(StatusType.IN_PROGRESS);
         task.setCreatedBy(2L);
         task.setProjectId(3L);
 

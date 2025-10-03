@@ -1,5 +1,6 @@
 package com.mpmt.backend.controller;
 
+import com.mpmt.backend.entity.StatusType;
 import com.mpmt.backend.entity.Task;
 import com.mpmt.backend.entity.TaskHistory;
 import com.mpmt.backend.service.TaskHistoryService;
@@ -41,6 +42,15 @@ public class TaskController {
         // List<TaskHistory> histories = taskHistoryService.getHistoriesByTaskId(id);
         // return ResponseEntity.ok(histories);
     //}
+
+    @GetMapping("/by-status")
+    public ResponseEntity<List<Task>> getTasksByStatus(
+            @RequestParam Long projectId,
+            @RequestParam StatusType status
+    ) {
+        List<Task> tasks = taskService.getTasksByProjectIdAndStatus(projectId, status);
+        return ResponseEntity.ok(tasks);
+    }
 
     @PostMapping
     public ResponseEntity<Task> createTask(@RequestBody Task task) {

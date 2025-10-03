@@ -5,7 +5,7 @@ import com.mpmt.backend.entity.RoleType;
 import jakarta.persistence.*;
 
 @Entity
-@Table(name = "project_members")
+@Table(name = "project_member")
 public class ProjectMember {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
