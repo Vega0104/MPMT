@@ -17,7 +17,7 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/auth")
-@CrossOrigin(origins = "*")
+//@CrossOrigin(origins = "*")
 public class AuthController {
 
     private final UserService userService;
@@ -37,9 +37,9 @@ public class AuthController {
     }
 
     @PostMapping("/signup")
-    public ResponseEntity<String> signup(@RequestBody SignupRequest request) {
+    public ResponseEntity<?> signup(@RequestBody SignupRequest request) {
         if (userService.emailExists(request.getEmail())) {
-            return ResponseEntity.badRequest().body("Email déjà utilisé");
+            return ResponseEntity.badRequest().body(Map.of("error", "Email déjà utilisé"));
         }
 
         User user = new User();
@@ -48,7 +48,14 @@ public class AuthController {
         user.setPassword(passwordEncoder.encode(request.getPassword()));
 
         userService.createUser(user);
-        return ResponseEntity.ok("Inscription réussie");
+
+        String token = jwtService.generateToken(user.getEmail());
+
+        Map<String, String> response = new HashMap<>();
+        response.put("token", token);
+        response.put("username", user.getUsername());
+
+        return ResponseEntity.ok(response);
     }
 
     @PostMapping("/login")

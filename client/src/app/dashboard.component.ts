@@ -1,46 +1,72 @@
-import { Component } from '@angular/core';
-
-interface Project {
-  name: string;
-  tasks: number;
-  members: number;
-  progress: number; // en pourcentage (0-100)
-}
-
-interface Task {
-  name: string;
-  dueDate: string;
-  status: 'To do' | 'In progress' | 'Done';
-}
-
-interface Notification {
-  message: string;
-  date: string;
-}
+import { Component, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { ProjectService, Project, ProjectStats } from './services/project-service/project.service';
+import { TaskService, Task } from './services/task-service/task.service';
+import { AuthService } from './services/auth-service/auth-service.service';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-dashboard',
   templateUrl: './dashboard.component.html',
   standalone: true,
+  imports: [CommonModule]
 })
-export class DashboardComponent {
-  userName = 'John Doe';
+export class DashboardComponent implements OnInit {
+  userName = 'User';
+  projects: Array<Project & { stats?: ProjectStats }> = [];
+  tasks: Task[] = [];
+  loading = true;
 
-  projects: Project[] = [
-    { name: 'Project A', tasks: 8, members: 2, progress: 40 },
-    { name: 'Project B', tasks: 15, members: 5, progress: 70 },
-    { name: 'Website Redesign', tasks: 5, members: 3, progress: 90 }
-  ];
+  constructor(
+    private projectService: ProjectService,
+    private taskService: TaskService,
+    private authService: AuthService,
+    private router: Router
+  ) {}
 
-  tasks: Task[] = [
-    { name: 'Fix login bug', dueDate: '2025-08-02', status: 'In progress' },
-    { name: 'Add task filters', dueDate: '2025-08-03', status: 'To do' },
-    { name: 'Release MVP', dueDate: '2025-08-05', status: 'Done' }
-  ];
+  ngOnInit() {
+    if (!this.authService.isLoggedIn()) {
+      this.router.navigate(['/login']);
+      return;
+    }
 
-  notifications: Notification[] = [
-    { message: 'Task "Design" updated by Alice.', date: '2025-07-30' },
-    { message: 'New project created: "Website".', date: '2025-07-29' },
-    { message: 'User Bob joined the team.', date: '2025-07-28' }
-  ];
+    this.loadProjects();
+    this.loadTasks();
+  }
+
+  loadProjects() {
+    this.projectService.getAllProjects().subscribe({
+      next: (projects) => {
+        this.projects = projects;
+        // Charger les stats pour chaque projet
+        projects.forEach(project => {
+          this.projectService.getProjectStats(project.id).subscribe({
+            next: (stats) => {
+              const p = this.projects.find(pr => pr.id === project.id);
+              if (p) p.stats = stats;
+            }
+          });
+        });
+        this.loading = false;
+      },
+      error: (err) => {
+        console.error('Error loading projects', err);
+        this.loading = false;
+      }
+    });
+  }
+
+  loadTasks() {
+    this.taskService.getAllTasks().subscribe({
+      next: (tasks) => {
+        this.tasks = tasks.slice(0, 5); // 5 premières tâches
+      },
+      error: (err) => console.error('Error loading tasks', err)
+    });
+  }
+
+  logout() {
+    this.authService.logout();
+    this.router.navigate(['/login']);
+  }
 }

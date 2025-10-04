@@ -2,6 +2,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import {API_BASE_URL} from "../../api-url";
 
 export interface SignupData {
   username: string;
@@ -16,7 +17,7 @@ export interface AuthResponse {
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
-  private baseUrl = 'http://localhost:8081/api/auth';
+  private baseUrl = `${API_BASE_URL}/api/auth`;
 
   constructor(private http: HttpClient) {}
 
@@ -47,3 +48,7 @@ export class AuthService {
     return !!this.getToken();
   }
 }
+
+
+
+

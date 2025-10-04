@@ -7,6 +7,7 @@ export const routes: Routes = [
   // app-routing.module.ts
   { path: 'login', component: AuthPageComponent },
   { path: 'signup', component: SignupPageComponent },
-  { path: 'dash', component: DashboardComponent },
+  { path: 'dashboard', component: DashboardComponent },
+  { path: '**', redirectTo: 'login' }
 
 ];
