@@ -11,7 +11,7 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/project-members")
-@CrossOrigin(origins = "*")
+//@CrossOrigin(origins = "*")
 public class ProjectMemberController {
 
     private final ProjectMemberService projectMemberService;

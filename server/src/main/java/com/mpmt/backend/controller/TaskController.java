@@ -14,7 +14,7 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/tasks")
-@CrossOrigin(origins = "*")
+//@CrossOrigin(origins = "*")
 public class TaskController {
 
     private final TaskService taskService;

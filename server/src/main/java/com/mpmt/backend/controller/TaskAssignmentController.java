@@ -11,7 +11,7 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/task-assignments")
-@CrossOrigin(origins = "*")
+//@CrossOrigin(origins = "*")
 public class TaskAssignmentController {
 
     private final TaskAssignmentService service;
