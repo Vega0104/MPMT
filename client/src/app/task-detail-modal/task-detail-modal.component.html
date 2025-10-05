@@ -14,9 +14,19 @@
       <div class="grid grid-cols-2 gap-4">
         <div>
           <label class="font-semibold">Status:</label>
-          <p>
-            <span class="px-2 py-1 rounded bg-blue-100">{{ task.status }}</span>
-          </p>
+          <select
+            [(ngModel)]="task.status"
+            (change)="onStatusChange(task.status)"
+            [disabled]="isUpdatingStatus"
+            class="px-2 py-1 border rounded"
+            [class.bg-gray-100]="task.status === 'TODO'"
+            [class.bg-blue-100]="task.status === 'IN_PROGRESS'"
+            [class.bg-green-100]="task.status === 'DONE'"
+          >
+            <option value="TODO">TODO</option>
+            <option value="IN_PROGRESS">IN_PROGRESS</option>
+            <option value="DONE">DONE</option>
+          </select>
         </div>
 
         <div>

@@ -49,4 +49,8 @@ export class TaskService {
   deleteTask(id: number): Observable<void> {
     return this.http.delete<void>(`${this.TasksUrl}/${id}`);
   }
+
+  updateTaskStatus(id: number, status: string): Observable<Task> {
+    return this.http.patch<Task>(`${this.TasksUrl}/${id}/status`, { status });
+  }
 }

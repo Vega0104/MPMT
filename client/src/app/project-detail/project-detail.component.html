@@ -49,12 +49,21 @@
       } @else {
         <div class="space-y-2">
           @for (task of tasks; track task.id) {
-            <div class="bg-white p-4 rounded shadow cursor-pointer hover:shadow-lg transition"
+            <div class="p-4 rounded shadow cursor-pointer hover:shadow-lg transition"
+                 [class.bg-gray-50]="task.status === 'TODO'"
+                 [class.bg-blue-50]="task.status === 'IN_PROGRESS'"
+                 [class.bg-green-50]="task.status === 'DONE'"
                  (click)="openTaskDetailModal(task)">
               <div class="flex justify-between items-start">
                 <div class="flex-1">
                   <div class="font-medium">{{ task.name }}</div>
-                  <div class="text-sm text-gray-500">{{ task.description }}</div>
+                  <div class="text-sm text-gray-600">{{ task.description }}</div>
+                  <span class="text-xs px-2 py-1 rounded mt-2 inline-block"
+                        [class.bg-gray-200]="task.status === 'TODO'"
+                        [class.bg-blue-200]="task.status === 'IN_PROGRESS'"
+                        [class.bg-green-200]="task.status === 'DONE'">
+                    {{ task.status }}
+                  </span>
                 </div>
                 <div class="flex gap-2 items-center">
                   <span class="px-2 py-1 rounded"
