@@ -1,87 +1,57 @@
-<!-- dashboard.component.html -->
-<div class="flex h-screen bg-gray-100">
-  <!-- Sidebar -->
-  <aside class="w-64 bg-white border-r flex flex-col">
-    <div class="text-2xl font-bold p-6 border-b">MPMT</div>
-    <nav class="flex-1 p-4 space-y-4">
-      <a href="#" class="block py-2 px-4 rounded hover:bg-gray-200">Dashboard</a>
-      <a href="#" class="block py-2 px-4 rounded hover:bg-gray-200">Projects</a>
-      <a href="#" class="block py-2 px-4 rounded hover:bg-gray-200">Tasks</a>
-      <a href="#" class="block py-2 px-4 rounded hover:bg-gray-200">Team</a>
-    </nav>
-    <div class="p-4 border-t text-sm text-gray-500">Logged as: <b>John Doe</b></div>
-  </aside>
+<div class="flex-1 p-8">
+  <div class="flex justify-between items-center mb-6">
+    <h2 class="text-3xl font-bold">Dashboard</h2>
+    <button
+      (click)="openCreateProjectModal()"
+      class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
+    >
+      + New Project
+    </button>
+  </div>
 
-  <!-- Main content -->
-  <main class="flex-1 flex flex-col">
-    <!-- Header -->
-    <header class="flex items-center justify-between px-8 py-4 bg-white shadow">
-      <h1 class="text-2xl font-semibold">Dashboard</h1>
-      <button class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium shadow">
-        + New Project
-      </button>
-    </header>
+  <section class="mb-8">
+    <h3 class="font-semibold text-lg mb-2">Your Projects</h3>
 
-    <div class="flex-1 flex px-8 py-6 space-x-6 overflow-auto">
-      <!-- Main Dashboard Area -->
-      <section class="flex-1 space-y-8">
-        <!-- Projects Overview -->
-        <div>
-          <h2 class="text-xl font-bold mb-3">Your Projects</h2>
-          <div *ngIf="loading" class="text-gray-500">Loading projects...</div>
-          <div *ngIf="!loading && projects.length === 0" class="text-gray-500">No projects yet.</div>
-          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            <div *ngFor="let project of projects" class="bg-white p-4 rounded-lg shadow border">
-              <div class="font-semibold text-lg mb-2">{{ project.name }}</div>
-              <div class="text-sm text-gray-500 mb-2">
-                {{ project.stats?.totalTasks || 0 }} tasks
-              </div>
-              <div class="w-full bg-gray-200 rounded-full h-2 mb-2">
-                <div class="bg-blue-500 h-2 rounded-full"
-                     [style.width.%]="project.stats?.progress || 0"></div>
-              </div>
-              <div class="flex justify-between items-center">
-                <span class="text-xs text-gray-400">Progress: {{ project.stats?.progress || 0 }}%</span>
-                <button class="text-blue-600 text-xs hover:underline">Details</button>
-              </div>
-            </div>
+    @if (loading) {
+      <div class="text-gray-500">Loading projects...</div>
+    } @else if (projects.length === 0) {
+      <div class="text-gray-500">No projects yet.</div>
+    } @else {
+      <div class="grid grid-cols-3 gap-4">
+        @for (project of projects; track project.id) {
+          <div
+            class="bg-white p-4 rounded-lg shadow cursor-pointer hover:shadow-lg transition"
+            (click)="navigateToProject(project.id)"
+          >
+            <h4 class="font-semibold">{{ project.name }}</h4>
+            <p class="text-sm text-gray-600 mt-1">{{ project.description }}</p>
           </div>
-        </div>
+        }
+      </div>
+    }
+  </section>
 
-        <!-- Tasks List -->
-        <div>
-          <h2 class="text-xl font-bold mb-3">Recent Tasks</h2>
-          <div *ngIf="tasks.length === 0" class="bg-white rounded-lg shadow p-4 text-gray-500">
-            No tasks yet.
-          </div>
-          <div *ngIf="tasks.length > 0" class="bg-white rounded-lg shadow divide-y">
-            <div *ngFor="let task of tasks" class="flex items-center justify-between px-4 py-3">
-              <span class="font-medium">{{ task.name }}</span>
-              <span class="text-xs text-gray-500">Due: {{ task.dueDate || 'N/A' }}</span>
-              <span class="px-2 py-1 rounded text-xs"
-                    [ngClass]="{
-              'bg-yellow-100 text-yellow-700': task.status === 'IN_PROGRESS',
-              'bg-green-100 text-green-700': task.status === 'DONE',
-              'bg-gray-100 text-gray-700': task.status === 'TODO'
-            }">
-        {{ task.status }}
-      </span>
-            </div>
-          </div>
-        </div>
-      </section>
+  <section class="mb-8">
+    <h3 class="font-semibold text-lg mb-2">Recent Tasks</h3>
 
-      <!-- Notifications -->
-      <aside class="w-80 space-y-4">
-        <div class="bg-white rounded-lg shadow p-4">
-          <h3 class="font-semibold text-lg mb-2">Notifications</h3>
-          <ul class="space-y-2">
-            <li class="text-sm text-gray-700">[2025-07-30] Task "Design" updated by Alice.</li>
-            <li class="text-sm text-gray-700">[2025-07-29] New project created: "Website".</li>
-            <!-- ... -->
-          </ul>
-        </div>
-      </aside>
-    </div>
-  </main>
+    @if (tasks.length === 0) {
+      <div class="text-gray-500">No tasks yet.</div>
+    } @else {
+      <div class="space-y-2">
+        @for (task of tasks; track task.id) {
+          <div class="bg-white p-3 rounded shadow">
+            <div class="font-medium">{{ task.name }}</div>
+            <div class="text-sm text-gray-500">{{ task.description }}</div>
+          </div>
+        }
+      </div>
+    }
+  </section>
+
+  @if (showCreateProjectModal) {
+    <app-create-project-modal
+      (close)="closeCreateProjectModal()"
+      (projectCreated)="onProjectCreated()"
+    />
+  }
 </div>

@@ -1,10 +1,11 @@
 package com.mpmt.backend.service;
 
-
 import com.mpmt.backend.entity.ProjectMember;
 import com.mpmt.backend.entity.Project;
 import com.mpmt.backend.entity.User;
 import com.mpmt.backend.repository.ProjectMemberRepository;
+import com.mpmt.backend.repository.ProjectRepository;
+import com.mpmt.backend.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.util.stream.Collectors;
@@ -17,10 +18,18 @@ import java.util.Optional;
 public class ProjectMemberService {
 
     private final ProjectMemberRepository projectMemberRepository;
+    private final ProjectRepository projectRepository;
+    private final UserRepository userRepository;
 
     @Autowired
-    public ProjectMemberService(ProjectMemberRepository projectMemberRepository) {
+    public ProjectMemberService(
+            ProjectMemberRepository projectMemberRepository,
+            ProjectRepository projectRepository,
+            UserRepository userRepository
+    ) {
         this.projectMemberRepository = projectMemberRepository;
+        this.projectRepository = projectRepository;
+        this.userRepository = userRepository;
     }
 
     public List<ProjectMember> getAllMembers() {
@@ -32,6 +41,15 @@ public class ProjectMemberService {
     }
 
     public ProjectMember createProjectMember(ProjectMember member) {
+        // Charger le Project et User depuis la DB
+        Project project = projectRepository.findById(member.getProject().getId())
+                .orElseThrow(() -> new RuntimeException("Project not found"));
+        User user = userRepository.findById(member.getUser().getId())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        member.setProject(project);
+        member.setUser(user);
+
         return projectMemberRepository.save(member);
     }
 
@@ -74,7 +92,7 @@ public class ProjectMemberService {
         Optional<ProjectMember> pmOpt = projectMemberRepository.findById(projectMemberId);
         if (pmOpt.isPresent()) {
             ProjectMember pm = pmOpt.get();
-            pm.setRole(RoleType.valueOf(newRole)); // Attention : valide si la string correspond bien à une valeur d'enum
+            pm.setRole(RoleType.valueOf(newRole));
             projectMemberRepository.save(pm);
             return Optional.of(pm);
         } else {
@@ -82,7 +100,7 @@ public class ProjectMemberService {
         }
     }
 
-
-
-
+    public Optional<ProjectMember> getByUserIdAndProjectId(Long userId, Long projectId) {
+        return projectMemberRepository.findByUserIdAndProjectId(userId, projectId);
+    }
 }

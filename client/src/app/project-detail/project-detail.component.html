@@ -1,0 +1,92 @@
+@if (project) {
+  <div class="p-8">
+    <div class="flex justify-between items-center mb-6">
+      <h2 class="text-3xl font-bold">{{ project.name }}</h2>
+      <div class="flex gap-3">
+        <button
+          (click)="openAddMemberModal()"
+          class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
+        >
+          + Add Member
+        </button>
+        <button
+          (click)="openCreateTaskModal()"
+          class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+        >
+          + New Task
+        </button>
+        <button
+          (click)="deleteProject()"
+          class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700"
+        >
+          Delete Project
+        </button>
+      </div>
+    </div>
+
+    <p class="text-gray-600 mb-6">{{ project.description }}</p>
+
+    <section class="mb-8">
+      <h3 class="font-semibold text-lg mb-3">Members ({{ members.length }})</h3>
+      @if (members.length === 0) {
+        <div class="text-gray-500">No members yet.</div>
+      } @else {
+        <div class="space-y-2">
+          @for (member of members; track member.id) {
+            <div class="bg-white p-3 rounded shadow flex justify-between items-center">
+              <div>{{ member.user.username }}</div>
+              <span class="px-2 py-1 bg-blue-100 rounded text-sm">{{ member.role }}</span>
+            </div>
+          }
+        </div>
+      }
+    </section>
+
+    <section>
+      <h3 class="font-semibold text-lg mb-3">Tasks ({{ tasks.length }})</h3>
+      @if (tasks.length === 0) {
+        <div class="text-gray-500">No tasks yet.</div>
+      } @else {
+        <div class="space-y-2">
+          @for (task of tasks; track task.id) {
+            <div class="bg-white p-4 rounded shadow">
+              <div class="flex justify-between">
+                <div>
+                  <div class="font-medium">{{ task.name }}</div>
+                  <div class="text-sm text-gray-500">{{ task.description }}</div>
+                </div>
+                <div class="text-sm">
+                  <span class="px-2 py-1 rounded"
+                        [class.bg-red-100]="task.priority === 'HIGH'"
+                        [class.bg-yellow-100]="task.priority === 'MEDIUM'"
+                        [class.bg-green-100]="task.priority === 'LOW'"
+                  >
+                    {{ task.priority }}
+                  </span>
+                </div>
+              </div>
+            </div>
+          }
+        </div>
+      }
+    </section>
+
+    @if (showCreateTaskModal) {
+      <app-create-task-modal
+        [projectId]="projectId"
+        (close)="closeCreateTaskModal()"
+        (taskCreated)="onTaskCreated()"
+      />
+    }
+
+    @if (showAddMemberModal) {
+      <app-add-member-modal
+        [projectId]="projectId"
+        (close)="closeAddMemberModal()"
+        (memberAdded)="onMemberAdded()"
+      />
+    }
+  </div>
+} @else {
+  <div class="p-8">Loading...</div>
+}

@@ -1,7 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import {HttpClientModule} from "@angular/common/http";
-import { HelloService } from './services/hello.service';
 
 @Component({
   selector: 'app-root',
@@ -14,12 +13,8 @@ export class AppComponent implements OnInit {
   title = 'Mpmt Frontend';
   helloMessage = '';
 
-  constructor(private helloService: HelloService) {}
+  constructor() {}
 
   ngOnInit() {
-    this.helloService.getHello().subscribe({
-      next: (msg) => this.helloMessage = msg,
-      error: (err) => this.helloMessage = 'Erreur : ' + err.message
-    });
   }
 }

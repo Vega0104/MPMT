@@ -67,10 +67,10 @@ public class AuthController {
             if (passwordEncoder.matches(request.getPassword(), user.getPassword())) {
                 String token = jwtService.generateToken(user.getEmail());
 
-                // Optionnel : renvoyer aussi le username
-                Map<String, String> response = new HashMap<>();
+                Map<String, Object> response = new HashMap<>();
                 response.put("token", token);
                 response.put("username", user.getUsername());
+                response.put("userId", user.getId());  // ← AJOUT
 
                 return ResponseEntity.ok(response);
             }

@@ -35,41 +35,60 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
         // Skip JWT validation for public endpoints
         String path = request.getRequestURI();
-        if (path.startsWith("/api/auth/") || path.equals("/hello") || path.startsWith("/actuator/")) {
+        System.out.println("=== JWT Filter - Path: " + path);
+
+        if (path.startsWith("/api/auth/") || path.startsWith("/api/hello") || path.startsWith("/actuator/")) {
+            System.out.println("=== Skipping JWT for public endpoint");
             filterChain.doFilter(request, response);
             return;
         }
 
         final String authHeader = request.getHeader("Authorization");
+        System.out.println("=== Authorization Header: " + (authHeader != null ? "Present" : "Missing"));
+
         final String jwt;
         final String userEmail;
 
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            System.out.println("=== No valid Authorization header, continuing without auth");
             filterChain.doFilter(request, response);
             return;
         }
 
-        jwt = authHeader.substring(7);
-        userEmail = jwtService.extractEmail(jwt);
+        try {
+            jwt = authHeader.substring(7);
+            System.out.println("=== JWT extracted, length: " + jwt.length());
 
-        if (userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-            var userOpt = userService.getUserByEmail(userEmail);
+            userEmail = jwtService.extractEmail(jwt);
+            System.out.println("=== Email extracted: " + userEmail);
 
-            if (userOpt.isPresent() && jwtService.isTokenValid(jwt, userEmail)) {
-                var user = userOpt.get();
+            if (userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+                var userOpt = userService.getUserByEmail(userEmail);
+                System.out.println("=== User found in DB: " + userOpt.isPresent());
 
-                var authToken = new UsernamePasswordAuthenticationToken(
-                        user,
-                        null,
-                        null
-                );
+                if (userOpt.isPresent() && jwtService.isTokenValid(jwt, userEmail)) {
+                    System.out.println("=== Token valid, authenticating user");
+                    var user = userOpt.get();
 
-                authToken.setDetails(
-                        new WebAuthenticationDetailsSource().buildDetails(request)
-                );
+                    var authToken = new UsernamePasswordAuthenticationToken(
+                            user,
+                            null,
+                            null
+                    );
 
-                SecurityContextHolder.getContext().setAuthentication(authToken);
+                    authToken.setDetails(
+                            new WebAuthenticationDetailsSource().buildDetails(request)
+                    );
+
+                    SecurityContextHolder.getContext().setAuthentication(authToken);
+                    System.out.println("=== Authentication successful");
+                } else {
+                    System.out.println("=== Token validation failed");
+                }
             }
+        } catch (Exception e) {
+            System.err.println("=== JWT Filter ERROR: " + e.getMessage());
+            e.printStackTrace();
         }
 
         filterChain.doFilter(request, response);

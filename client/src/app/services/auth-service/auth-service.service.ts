@@ -1,7 +1,7 @@
 // src/app/services/auth.service.ts
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, tap } from 'rxjs';
 import {API_BASE_URL} from "../../api-url";
 
 export interface SignupData {
@@ -13,11 +13,12 @@ export interface SignupData {
 export interface AuthResponse {
   token: string;
   username: string;
+  userId: number;
 }
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
-  private baseUrl = `${API_BASE_URL}/api/auth`;
+  private baseUrl = `${API_BASE_URL}/auth`;
 
   constructor(private http: HttpClient) {}
 
@@ -28,7 +29,12 @@ export class AuthService {
 
   // Connexion
   login(email: string, password: string): Observable<AuthResponse> {
-    return this.http.post<AuthResponse>(`${this.baseUrl}/login`, { email, password });
+    return this.http.post<AuthResponse>(`${this.baseUrl}/login`, { email, password }).pipe(
+      tap(response => {
+        localStorage.setItem('auth_token', response.token);
+        localStorage.setItem('user_id', response.userId.toString());  // ← AJOUT
+      })
+    );
   }
 
   // Token (localStorage)
@@ -46,6 +52,19 @@ export class AuthService {
 
   isLoggedIn(): boolean {
     return !!this.getToken();
+  }
+
+  getCurrentUserId(): number | null {
+    const token = localStorage.getItem('auth_token');
+    if (!token) return null;
+
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      // Le JWT contient l'email, pas l'ID. Il faut stocker l'ID au login
+      return Number(localStorage.getItem('user_id'));
+    } catch {
+      return null;
+    }
   }
 }
 

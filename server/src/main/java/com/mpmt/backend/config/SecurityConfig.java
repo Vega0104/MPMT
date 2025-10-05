@@ -47,6 +47,12 @@ public class SecurityConfig {
                         .requestMatchers("/actuator/health", "/actuator/health/**").permitAll()
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers("/api/auth/**", "/hello").permitAll()
+                        .requestMatchers(
+                                "/api/projects/**",
+                                "/api/tasks/**",
+                                "/api/users/**",
+                                "/api/project-members/**"
+                        ).authenticated()
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
