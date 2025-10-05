@@ -49,13 +49,14 @@
       } @else {
         <div class="space-y-2">
           @for (task of tasks; track task.id) {
-            <div class="bg-white p-4 rounded shadow">
-              <div class="flex justify-between">
-                <div>
+            <div class="bg-white p-4 rounded shadow cursor-pointer hover:shadow-lg transition"
+                 (click)="openTaskDetailModal(task)">
+              <div class="flex justify-between items-start">
+                <div class="flex-1">
                   <div class="font-medium">{{ task.name }}</div>
                   <div class="text-sm text-gray-500">{{ task.description }}</div>
                 </div>
-                <div class="text-sm">
+                <div class="flex gap-2 items-center">
                   <span class="px-2 py-1 rounded"
                         [class.bg-red-100]="task.priority === 'HIGH'"
                         [class.bg-yellow-100]="task.priority === 'MEDIUM'"
@@ -63,6 +64,12 @@
                   >
                     {{ task.priority }}
                   </span>
+                  <button
+                    (click)="openAssignTaskModal(task.id); $event.stopPropagation()"
+                    class="px-3 py-1 bg-purple-600 text-white text-sm rounded hover:bg-purple-700"
+                  >
+                    Assign
+                  </button>
                 </div>
               </div>
             </div>
@@ -84,6 +91,22 @@
         [projectId]="projectId"
         (close)="closeAddMemberModal()"
         (memberAdded)="onMemberAdded()"
+      />
+    }
+
+    @if (showAssignTaskModal) {
+      <app-assign-task-modal
+        [taskId]="selectedTaskId"
+        [projectId]="projectId"
+        (close)="closeAssignTaskModal()"
+        (assigned)="onTaskAssigned()"
+      />
+    }
+
+    @if (showTaskDetailModal && selectedTask) {
+      <app-task-detail-modal
+        [task]="selectedTask"
+        (close)="closeTaskDetailModal()"
       />
     }
   </div>

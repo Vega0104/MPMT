@@ -4,6 +4,7 @@ import { Router } from '@angular/router';
 import { ProjectService, Project } from './services/project-service/project.service';
 import { TaskService, Task } from './services/task-service/task.service';
 import { CreateProjectModalComponent } from './create-project-modal/create-project-modal.component';
+import { AuthService } from './services/auth-service/auth-service.service';
 
 @Component({
   selector: 'app-dashboard',
@@ -20,7 +21,8 @@ export class DashboardComponent implements OnInit {
   constructor(
     private projectService: ProjectService,
     private taskService: TaskService,
-    private router: Router
+    private router: Router,
+    private authService: AuthService
   ) {}
 
   ngOnInit() {
@@ -65,5 +67,10 @@ export class DashboardComponent implements OnInit {
 
   navigateToProject(id: number) {
     this.router.navigate(['/projects', id]);
+  }
+
+  logout() {
+    this.authService.logout();
+    this.router.navigate(['/login']);
   }
 }

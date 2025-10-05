@@ -6,11 +6,13 @@ import { TaskService, Task } from '../services/task-service/task.service';
 import { ProjectMemberService, ProjectMember } from '../services/project-member-service/project-member.service';
 import { CreateTaskModalComponent } from '../create-task-modal/create-task-modal.component';
 import { AddMemberModalComponent } from '../add-member-modal/add-member-modal.component';
+import { AssignTaskModalComponent } from "../assign-task-modal/assign-task-modal.component";
+import { TaskDetailModalComponent } from '../task-detail-modal/task-detail-modal.component';
 
 @Component({
   selector: 'app-project-detail',
   standalone: true,
-  imports: [CommonModule, CreateTaskModalComponent, AddMemberModalComponent],
+  imports: [CommonModule, CreateTaskModalComponent, AddMemberModalComponent, AssignTaskModalComponent, TaskDetailModalComponent],
   templateUrl: './project-detail.component.html'
 })
 export class ProjectDetailComponent implements OnInit {
@@ -20,6 +22,10 @@ export class ProjectDetailComponent implements OnInit {
   projectId: number = 0;
   showCreateTaskModal = false;
   showAddMemberModal = false;
+  showAssignTaskModal = false;
+  showTaskDetailModal = false;
+  selectedTaskId: number = 0;
+  selectedTask: Task | null = null;
 
   constructor(
     private route: ActivatedRoute,
@@ -53,10 +59,7 @@ export class ProjectDetailComponent implements OnInit {
   loadMembers() {
     this.projectMemberService.getAllMembers().subscribe({
       next: (data) => {
-        console.log('All members from API:', data);
-        console.log('Current projectId:', this.projectId);
         this.members = data.filter(m => m.project.id === this.projectId);
-        console.log('Filtered members:', this.members);
       },
       error: (err) => console.error('Error loading members', err)
     });
@@ -93,5 +96,27 @@ export class ProjectDetailComponent implements OnInit {
       next: () => this.router.navigate(['/dashboard']),
       error: (err) => console.error('Error deleting project', err)
     });
+  }
+
+  openAssignTaskModal(taskId: number) {
+    this.selectedTaskId = taskId;
+    this.showAssignTaskModal = true;
+  }
+
+  closeAssignTaskModal() {
+    this.showAssignTaskModal = false;
+  }
+
+  onTaskAssigned() {
+    this.loadTasks();
+  }
+
+  openTaskDetailModal(task: Task) {
+    this.selectedTask = task;
+    this.showTaskDetailModal = true;
+  }
+
+  closeTaskDetailModal() {
+    this.showTaskDetailModal = false;
   }
 }

@@ -52,7 +52,21 @@ public class TaskAssignmentController {
     }
 
     @PostMapping
-    public ResponseEntity<TaskAssignment> create(@RequestBody TaskAssignment assignment) {
+    public ResponseEntity<?> create(@RequestBody CreateAssignmentRequest request) {
+        // Vérifier doublon
+        TaskAssignment existing = service.getByTaskIdAndProjectMemberId(
+                request.getTaskId(),
+                request.getProjectMemberId()
+        );
+
+        if (existing != null) {
+            return ResponseEntity.badRequest().body("User already assigned to this task");
+        }
+
+        TaskAssignment assignment = new TaskAssignment();
+        assignment.setTaskId(request.getTaskId());
+        assignment.setProjectMemberId(request.getProjectMemberId());
+
         return ResponseEntity.ok(service.create(assignment));
     }
 
@@ -60,5 +74,15 @@ public class TaskAssignmentController {
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         service.delete(id);
         return ResponseEntity.noContent().build();
+    }
+
+    public static class CreateAssignmentRequest {
+        private Long taskId;
+        private Long projectMemberId;
+
+        public Long getTaskId() { return taskId; }
+        public void setTaskId(Long taskId) { this.taskId = taskId; }
+        public Long getProjectMemberId() { return projectMemberId; }
+        public void setProjectMemberId(Long projectMemberId) { this.projectMemberId = projectMemberId; }
     }
 }
