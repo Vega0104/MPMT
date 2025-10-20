@@ -1,7 +1,12 @@
 package com.mpmt.backend.entity;
 
 import jakarta.persistence.*;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 
 @Entity
 @Table(name = "project")
@@ -21,8 +26,16 @@ public class Project {
     @Temporal(TemporalType.TIMESTAMP)
     private Date createdAt = new Date();
 
-    // Getters et setters
+    // Cascade & orphanRemoval vers les membres
+    @JsonIgnore
+    @OneToMany(mappedBy = "project", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private List<ProjectMember> members = new ArrayList<>();
 
+    @JsonIgnore
+    @OneToMany(mappedBy = "project", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private List<Task> tasks = new ArrayList<>();
+
+    // ====== Getters / Setters ======
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 
@@ -37,4 +50,10 @@ public class Project {
 
     public Date getCreatedAt() { return createdAt; }
     public void setCreatedAt(Date createdAt) { this.createdAt = createdAt; }
+
+    public List<ProjectMember> getMembers() { return members; }
+    public void setMembers(List<ProjectMember> members) { this.members = members; }
+
+    public List<Task> getTasks() { return tasks; }
+    public void setTasks(List<Task> tasks) { this.tasks = tasks; }
 }

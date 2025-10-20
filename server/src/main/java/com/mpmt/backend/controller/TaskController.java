@@ -8,6 +8,16 @@ import com.mpmt.backend.service.TaskService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+// imports à ajouter en haut du fichier
+import com.mpmt.backend.DTO.StatusUpdateRequest;
+import com.mpmt.backend.entity.Task;
+import jakarta.persistence.EntityNotFoundException;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
+import jakarta.validation.Valid;
+
 
 import java.util.List;
 import java.util.Optional;
@@ -87,5 +97,21 @@ public class TaskController {
         Task savedTask = taskService.updateTask(existingTask);
         return ResponseEntity.ok(savedTask);
     }
+
+    @PatchMapping("/{id}/status")
+    public ResponseEntity<Task> updateStatus(
+            @PathVariable Long id,
+            @RequestBody @Valid StatusUpdateRequest body
+    ) {
+        try {
+            Task updated = taskService.updateTaskStatus(id, body.status());
+            return ResponseEntity.ok(updated);
+        } catch (EntityNotFoundException ex) {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+
+
 
 }

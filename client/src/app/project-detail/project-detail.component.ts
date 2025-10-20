@@ -20,12 +20,16 @@ export class ProjectDetailComponent implements OnInit {
   tasks: Task[] = [];
   members: ProjectMember[] = [];
   projectId: number = 0;
+
   showCreateTaskModal = false;
   showAddMemberModal = false;
   showAssignTaskModal = false;
   showTaskDetailModal = false;
+
   selectedTaskId: number = 0;
   selectedTask: Task | null = null;
+
+  trackByMember = (_: number, m: ProjectMember | null | undefined) => m?.id ?? _;
 
   constructor(
     private route: ActivatedRoute,
@@ -51,15 +55,18 @@ export class ProjectDetailComponent implements OnInit {
 
   loadTasks() {
     this.taskService.getAllTasks().subscribe({
-      next: (data) => this.tasks = data.filter(t => t.projectId === this.projectId),
+      next: (data) => {
+        const list = Array.isArray(data) ? data : [];
+        this.tasks = list.filter(t => t && Number(t.projectId) === this.projectId);
+      },
       error: (err) => console.error('Error loading tasks', err)
     });
   }
 
   loadMembers() {
-    this.projectMemberService.getAllMembers().subscribe({
+    this.projectMemberService.getMembersByProjectId(this.projectId).subscribe({
       next: (data) => {
-        this.members = data.filter(m => m.project.id === this.projectId);
+        this.members = Array.isArray(data) ? data : [];
       },
       error: (err) => console.error('Error loading members', err)
     });
@@ -86,6 +93,7 @@ export class ProjectDetailComponent implements OnInit {
   }
 
   onMemberAdded() {
+    this.closeAddMemberModal();
     this.loadMembers();
   }
 

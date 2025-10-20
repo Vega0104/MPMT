@@ -53,6 +53,24 @@ public class ProjectMemberService {
         return projectMemberRepository.save(member);
     }
 
+    // NOUVELLE MÉTHODE pour compatibilité avec ProjectController
+    public ProjectMember createMember(ProjectMember member) {
+        // Si on utilise les IDs directement
+        if (member.getProjectId() != null && member.getUserId() != null) {
+            Project project = projectRepository.findById(member.getProjectId())
+                    .orElseThrow(() -> new RuntimeException("Project not found"));
+            User user = userRepository.findById(member.getUserId())
+                    .orElseThrow(() -> new RuntimeException("User not found"));
+
+            member.setProject(project);
+            member.setUser(user);
+        }
+
+        return projectMemberRepository.save(member);
+    }
+
+
+
     public List<ProjectMember> getByProject(Project project) {
         return projectMemberRepository.findByProject(project);
     }
@@ -70,22 +88,22 @@ public class ProjectMemberService {
     }
 
     public List<Project> findProjectsByUserId(Long userId) {
-        List<ProjectMember> memberships = projectMemberRepository.findByUserId(userId);
+        List<ProjectMember> memberships = projectMemberRepository.findByUser_Id(userId); // <-- conserve findByUser_Id
         return memberships.stream()
                 .map(ProjectMember::getProject)
                 .collect(Collectors.toList());
     }
 
     public List<ProjectMember> getMembersByProjectId(Long projectId) {
-        return projectMemberRepository.findByProjectId(projectId);
+        return projectMemberRepository.findByProject_Id(projectId);
     }
 
     public List<ProjectMember> findByProjectId(Long projectId) {
-        return projectMemberRepository.findByProjectId(projectId);
+        return projectMemberRepository.findByProject_Id(projectId);
     }
 
     public List<ProjectMember> findMembersByProjectId(Long projectId) {
-        return projectMemberRepository.findByProjectId(projectId);
+        return projectMemberRepository.findByProject_Id(projectId);
     }
 
     public Optional<ProjectMember> updateRole(Long projectMemberId, String newRole) {
@@ -101,6 +119,6 @@ public class ProjectMemberService {
     }
 
     public Optional<ProjectMember> getByUserIdAndProjectId(Long userId, Long projectId) {
-        return projectMemberRepository.findByUserIdAndProjectId(userId, projectId);
+        return projectMemberRepository.findByUser_IdAndProject_Id(userId, projectId);
     }
 }

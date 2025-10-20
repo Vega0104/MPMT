@@ -18,8 +18,12 @@ public class User {
     @Column(nullable = false)
     private String password;
 
-    // Getters et setters
+    // ⬇️ AJOUT
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private RoleType role = RoleType.MEMBER; // valeur par défaut
 
+    // Getters / Setters
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 
@@ -31,4 +35,7 @@ public class User {
 
     public String getPassword() { return password; }
     public void setPassword(String password) { this.password = password; }
+
+    public RoleType getRole() { return role; }
+    public void setRole(RoleType role) { this.role = role; }
 }

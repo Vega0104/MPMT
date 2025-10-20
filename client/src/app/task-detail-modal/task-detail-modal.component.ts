@@ -41,14 +41,27 @@ export class TaskDetailModalComponent implements OnInit {
   }
 
   loadAssignedMembers() {
-    this.projectMemberService.getAllMembers().subscribe({
+    // 1) Récupère uniquement les membres DU PROJET de la tâche
+    this.projectMemberService.getMembersByProjectId(this.task.projectId).subscribe({
       next: (members) => {
-        this.assignedMembers = members.filter(m =>
-          this.assignments.some(a => a.projectMemberId === m.id)
-        );
+        // 2) Garde-fou: enlève les éléments falsy
+        const safeMembers = (members ?? []).filter((m): m is ProjectMember => !!m && !!m.id);
+
+        // 3) Crée un Set des IDs de ProjectMember assignés à la tâche
+        const assignedIds = new Set((this.assignments ?? [])
+          .filter(a => a && a.projectMemberId != null)
+          .map(a => a.projectMemberId as number));
+
+        // 4) Filtre final
+        this.assignedMembers = safeMembers.filter(m => assignedIds.has(m.id));
+      },
+      error: (err) => {
+        console.error('Error loading project members', err);
+        this.assignedMembers = [];
       }
     });
   }
+
 
   onClose() {
     this.close.emit();

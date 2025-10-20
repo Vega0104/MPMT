@@ -10,6 +10,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import jakarta.annotation.PostConstruct;
+import com.mpmt.backend.entity.RoleType;
+
 
 import java.util.HashMap;
 import java.util.Map;
@@ -46,6 +48,7 @@ public class AuthController {
         user.setUsername(request.getUsername());
         user.setEmail(request.getEmail());
         user.setPassword(passwordEncoder.encode(request.getPassword()));
+        user.setRole(RoleType.MEMBER);
 
         userService.createUser(user);
 
@@ -54,6 +57,7 @@ public class AuthController {
         Map<String, String> response = new HashMap<>();
         response.put("token", token);
         response.put("username", user.getUsername());
+        response.put("role", user.getRole().name());
 
         return ResponseEntity.ok(response);
     }

@@ -35,7 +35,7 @@ export class AssignTaskModalComponent implements OnInit {
   loadMembers() {
     this.projectMemberService.getAllMembers().subscribe({
       next: (data) => {
-        this.members = data.filter(m => m.project.id === this.projectId);
+        this.members = data.filter(m => m.project?.id === this.projectId);
       },
       error: (err) => console.error('Error loading members', err)
     });

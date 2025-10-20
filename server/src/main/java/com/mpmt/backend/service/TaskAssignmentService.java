@@ -60,7 +60,7 @@ public class TaskAssignmentService {
     }
 
     public List<Task> findTasksAssignedToUser(Long userId) {
-        List<ProjectMember> memberships = projectMemberRepository.findByUserId(userId);
+        List<ProjectMember> memberships = projectMemberRepository.findByUser_Id(userId);
         List<Long> memberIds = memberships.stream()
                 .map(ProjectMember::getId)
                 .collect(Collectors.toList());

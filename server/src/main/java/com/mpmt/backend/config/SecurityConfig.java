@@ -5,6 +5,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
+import org.springframework.security.access.hierarchicalroles.RoleHierarchy;
+import org.springframework.security.access.hierarchicalroles.RoleHierarchyImpl;
+import org.springframework.security.access.expression.method.DefaultMethodSecurityExpressionHandler;
+import org.springframework.security.access.expression.method.MethodSecurityExpressionHandler;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -19,14 +23,10 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.web.cors.CorsConfiguration;
-import org.springframework.web.cors.CorsConfigurationSource;
-
-import java.util.List;
 
 @Configuration
 @EnableWebSecurity
-@EnableMethodSecurity
+@EnableMethodSecurity // active @PreAuthorize, etc.
 public class SecurityConfig {
 
     private final JwtAuthFilter jwtAuthFilter;
@@ -42,11 +42,11 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         return http
                 .csrf(AbstractHttpConfigurer::disable)
-                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+                // ⚠️ CORS géré par CorsConfig (CorsFilter global); pas de config CORS ici
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/actuator/health", "/actuator/health/**").permitAll()
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                        .requestMatchers("/api/auth/**", "/hello").permitAll()
+                        .requestMatchers("/api/auth/**", "/auth/**", "/hello").permitAll()
                         .requestMatchers(
                                 "/api/projects/**",
                                 "/api/tasks/**",
@@ -61,16 +61,23 @@ public class SecurityConfig {
                 .build();
     }
 
+    // === Hiérarchie des rôles : ADMIN > MEMBER > OBSERVER ===
     @Bean
-    public CorsConfigurationSource corsConfigurationSource() {
-        return request -> {
-            CorsConfiguration config = new CorsConfiguration();
-            config.setAllowedOrigins(List.of("http://localhost:4200", "http://localhost:8080"));
-            config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-            config.setAllowedHeaders(List.of("*"));
-            config.setAllowCredentials(true);
-            return config;
-        };
+    public RoleHierarchy roleHierarchy() {
+        RoleHierarchyImpl rh = new RoleHierarchyImpl();
+        rh.setHierarchy("""
+            ROLE_ADMIN > ROLE_MEMBER
+            ROLE_MEMBER > ROLE_OBSERVER
+        """);
+        return rh;
+    }
+
+    // Relie la hiérarchie aux expressions de sécurité méthode (@PreAuthorize)
+    @Bean
+    public MethodSecurityExpressionHandler methodSecurityExpressionHandler(RoleHierarchy roleHierarchy) {
+        DefaultMethodSecurityExpressionHandler handler = new DefaultMethodSecurityExpressionHandler();
+        handler.setRoleHierarchy(roleHierarchy);
+        return handler;
     }
 
     @Bean

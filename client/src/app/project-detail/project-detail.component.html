@@ -1,7 +1,7 @@
 @if (project) {
   <div class="p-8">
     <div class="flex justify-between items-center mb-6">
-      <h2 class="text-3xl font-bold">{{ project.name }}</h2>
+      <h2 class="text-3xl font-bold">{{ project?.name }}</h2>
       <div class="flex gap-3">
         <button
           (click)="openAddMemberModal()"
@@ -24,18 +24,27 @@
       </div>
     </div>
 
-    <p class="text-gray-600 mb-6">{{ project.description }}</p>
+    <p class="text-gray-600 mb-6">{{ project?.description ?? '—' }}</p>
 
     <section class="mb-8">
-      <h3 class="font-semibold text-lg mb-3">Members ({{ members.length }})</h3>
-      @if (members.length === 0) {
+      <h3 class="font-semibold text-lg mb-3">Members ({{ members?.length || 0 }})</h3>
+      @if ((members?.length || 0) === 0) {
         <div class="text-gray-500">No members yet.</div>
       } @else {
         <div class="space-y-2">
-          @for (member of members; track member.id) {
+          @for (member of members; track trackByMember) {
             <div class="bg-white p-3 rounded shadow flex justify-between items-center">
-              <div>{{ member.user.username }}</div>
-              <span class="px-2 py-1 bg-blue-100 rounded text-sm">{{ member.role }}</span>
+              <div class="flex flex-col">
+                <div class="font-medium">
+                  {{ member?.user?.username ?? '—' }}
+                </div>
+                <div class="text-sm text-gray-500">
+                  {{ member?.user?.email ?? '' }}
+                </div>
+              </div>
+              <span class="px-2 py-1 bg-blue-100 rounded text-sm">
+                {{ member?.role ?? '—' }}
+              </span>
             </div>
           }
         </div>
@@ -43,8 +52,8 @@
     </section>
 
     <section>
-      <h3 class="font-semibold text-lg mb-3">Tasks ({{ tasks.length }})</h3>
-      @if (tasks.length === 0) {
+      <h3 class="font-semibold text-lg mb-3">Tasks ({{ tasks?.length || 0 }})</h3>
+      @if ((tasks?.length || 0) === 0) {
         <div class="text-gray-500">No tasks yet.</div>
       } @else {
         <div class="space-y-2">
@@ -69,8 +78,7 @@
                   <span class="px-2 py-1 rounded"
                         [class.bg-red-100]="task.priority === 'HIGH'"
                         [class.bg-yellow-100]="task.priority === 'MEDIUM'"
-                        [class.bg-green-100]="task.priority === 'LOW'"
-                  >
+                        [class.bg-green-100]="task.priority === 'LOW'">
                     {{ task.priority }}
                   </span>
                   <button

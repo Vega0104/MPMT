@@ -1,8 +1,7 @@
 #!/bin/sh
 set -e
-cat <<JS > /usr/share/nginx/html/env.js
-window.__env = {
-  API_URL: "${API_URL:-http://localhost:8081}"
-};
-JS
+echo "[entrypoint] writing /usr/share/nginx/html/env.js"
+cat > /usr/share/nginx/html/env.js <<'EOF'
+window.__env = { API_URL: 'http://localhost:8081/api' };
+EOF
 exec "$@"

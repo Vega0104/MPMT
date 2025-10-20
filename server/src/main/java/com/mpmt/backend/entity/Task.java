@@ -1,5 +1,7 @@
 package com.mpmt.backend.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import java.time.LocalDate;
 
@@ -29,10 +31,13 @@ public class Task {
     @Column(nullable = false)
     private Long createdBy;
 
-    @Column(nullable = false)
-    private Long projectId;
+    // ---- Relation JPA propre vers Project ----
+    @ManyToOne(optional = false, fetch = FetchType.LAZY)
+    @JoinColumn(name = "project_id", nullable = false)
+    @JsonIgnore // on masque l'objet complet au JSON pour éviter les cycles & gros payloads
+    private Project project;
 
-    // Getters et setters
+    // ====== Getters / Setters ======
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 
@@ -57,6 +62,23 @@ public class Task {
     public Long getCreatedBy() { return createdBy; }
     public void setCreatedBy(Long createdBy) { this.createdBy = createdBy; }
 
-    public Long getProjectId() { return projectId; }
-    public void setProjectId(Long projectId) { this.projectId = projectId; }
+    public Project getProject() { return project; }
+    public void setProject(Project project) { this.project = project; }
+
+    // ====== Compat API : expose projectId ======
+    @JsonProperty("projectId")
+    public Long getProjectId() {
+        return (project != null) ? project.getId() : null;
+    }
+
+    @JsonProperty("projectId")
+    public void setProjectId(Long projectId) {
+        if (projectId == null) {
+            this.project = null;
+        } else {
+            Project p = new Project();
+            p.setId(projectId);
+            this.project = p;
+        }
+    }
 }

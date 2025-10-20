@@ -11,6 +11,7 @@
           name="projectName"
           class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
           placeholder="Enter project name"
+          [disabled]="isSubmitting"
           required
         />
       </div>
@@ -23,7 +24,24 @@
           rows="3"
           class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
           placeholder="Enter project description"
+          [disabled]="isSubmitting"
         ></textarea>
+      </div>
+
+      <div class="mb-4">
+        <label class="block text-sm font-medium mb-1">Start Date *</label>
+        <input
+          type="date"
+          [(ngModel)]="projectStartDate"
+          name="projectStartDate"
+          class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          [disabled]="isSubmitting"
+          required
+        />
+      </div>
+
+      <div class="mb-4 p-3 bg-blue-50 text-blue-700 rounded-lg">
+        <p class="text-sm">You will be automatically added as the project administrator.</p>
       </div>
 
       @if (error) {
