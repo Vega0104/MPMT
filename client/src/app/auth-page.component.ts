@@ -4,11 +4,13 @@ import { Router } from '@angular/router';
 import { AuthService } from './services/auth-service/auth-service.service';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { RouterModule } from '@angular/router';   // <- pour routerLink
+
 
 @Component({
   selector: 'app-auth-page',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, RouterModule],
   templateUrl: './auth-page.component.html'
 })
 export class AuthPageComponent {

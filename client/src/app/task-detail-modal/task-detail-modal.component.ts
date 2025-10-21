@@ -7,6 +7,9 @@ import { Task, TaskService } from '../services/task-service/task.service';
 import { TaskAssignmentService } from '../services/tast-assignment-service/task-assignment.service';
 import { ProjectMemberService, ProjectMember } from '../services/project-member-service/project-member.service';
 
+// ⬇️ NEW: service d'historique (ajuste le chemin si besoin)
+import { TaskHistoryService, TaskHistory } from '../services/task-history/task-history.service';
+
 type TaskStatus = 'TODO' | 'IN_PROGRESS' | 'DONE';
 type TaskPriority = 'LOW' | 'MEDIUM' | 'HIGH';
 type Assignment = { id: number; taskId: number; projectMemberId: number };
@@ -36,19 +39,38 @@ export class TaskDetailModalComponent implements OnInit {
   assignedMembers: ProjectMember[] = [];
   selectedMemberIds = new Set<number>();
 
+  // ⬇️ NEW: stockage des entrées d'historique
+  histories: TaskHistory[] = [];
+
   isSubmitting = false;
   error = '';
 
   constructor(
     private taskAssignmentService: TaskAssignmentService,
     private projectMemberService: ProjectMemberService,
-    private taskService: TaskService
+    private taskService: TaskService,
+    // ⬇️ NEW
+    private taskHistoryService: TaskHistoryService
   ) {}
 
   ngOnInit() {
     this.hydrateFormFromTask();
     this.loadAssignments();
     this.loadProjectMembers();
+    // ⬇️ NEW: charge l'historique
+    this.loadHistory();
+  }
+
+  // ⬇️ NEW: lecture de l’historique
+  private loadHistory() {
+    if (!this.task?.id) {
+      this.histories = [];
+      return;
+    }
+    this.taskHistoryService.getHistoryByTaskId(this.task.id).subscribe({
+      next: (items) => this.histories = items ?? [],
+      error: () => this.histories = []
+    });
   }
 
   private hydrateFormFromTask() {
@@ -143,7 +165,7 @@ export class TaskDetailModalComponent implements OnInit {
 
       this.isSubmitting = false;
       this.statusUpdated.emit();
-      this.onClose();
+      this.onClose(); // si tu gardes la modale ouverte, tu pourrais appeler this.loadHistory() ici
     } catch (err: any) {
       this.error = err?.error?.message || 'Failed to save changes';
       this.isSubmitting = false;

@@ -125,6 +125,30 @@
             }
           </div>
         </div>
+
+        <!-- ⬇️ NEW: History -->
+        <div class="mt-6 border-t pt-4">
+          <h3 class="text-lg font-semibold mb-2">History</h3>
+
+          <div class="max-h-48 overflow-y-auto space-y-2 text-sm">
+            @if (!(histories?.length)) {
+              <p class="text-gray-500">No history for this task yet.</p>
+            } @else {
+              @for (h of histories; track h.id) {
+                <div class="border rounded p-2 bg-gray-50">
+                  <div class="flex justify-between text-xs text-gray-500">
+                    <span>User #{{ h.changedBy || '—' }}</span>
+                    <span>{{ h.changeDate | date:'short' }}</span>
+                  </div>
+                  <div class="mt-1">
+                    {{ h.changeDescription }}
+                  </div>
+                </div>
+              }
+            }
+          </div>
+        </div>
+        <!-- /History -->
       </div>
 
       @if (error) {

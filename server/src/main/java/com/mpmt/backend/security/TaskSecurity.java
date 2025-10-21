@@ -6,6 +6,7 @@ import com.mpmt.backend.repository.ProjectMemberRepository;
 import com.mpmt.backend.repository.TaskRepository;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder; // ⬅️ NEW
 import org.springframework.stereotype.Component;
 
 @Component("taskSecurity")
@@ -19,10 +20,22 @@ public class TaskSecurity {
         this.pmRepo = pmRepo;
     }
 
+    /**
+     * ✅ Méthode utilisée par @PreAuthorize("@taskSecurity.canAccessTask(#taskId)")
+     * Récupère l'Authentication depuis le SecurityContext.
+     */
+    public boolean canAccessTask(Long taskId) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        return canEditTask(taskId, auth); // on réutilise la logique existante
+    }
+
+    /**
+     * Logique d'accès existante : ADMIN global OU membre du projet de la tâche.
+     */
     public boolean canEditTask(Long taskId, Authentication auth) {
         if (auth == null || !auth.isAuthenticated()) return false;
 
-        // 1) ADMIN global via authorities
+        // 1) ADMIN global
         boolean isAdmin = auth.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
                 .anyMatch("ROLE_ADMIN"::equals);
@@ -34,14 +47,12 @@ public class TaskSecurity {
 
         // 3) Charger la tâche → vérifier appartenance au projet
         Task task = taskRepo.findById(taskId).orElse(null);
-        if (task == null) return false;
-
-        Long projectId = null;
-        if (task.getProject() != null) {
-            projectId = task.getProject().getId();
+        if (task == null || task.getProject() == null || task.getProject().getId() == null) {
+            return false;
         }
-        if (projectId == null) return false;
 
+        Long projectId = task.getProject().getId();
+        // Autoriser si l'utilisateur est membre du projet (ADMIN/MEMBER/OBSERVER côté ProjectMember.role)
         return pmRepo.existsByProject_IdAndUser_Id(projectId, userId);
     }
 
