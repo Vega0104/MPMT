@@ -1,79 +1,153 @@
 <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
   <div class="bg-white rounded-lg p-6 w-full max-w-2xl">
     <div class="flex justify-between items-start mb-4">
-      <h2 class="text-2xl font-bold">{{ task.name }}</h2>
+      <h2 class="text-2xl font-bold">Task details</h2>
       <button (click)="onClose()" class="text-gray-500 hover:text-gray-700 text-2xl">&times;</button>
     </div>
 
-    <div class="space-y-4">
-      <div>
-        <label class="font-semibold">Description:</label>
-        <p class="text-gray-700">{{ task.description || 'No description' }}</p>
-      </div>
-
-      <div class="grid grid-cols-2 gap-4">
+    <form (ngSubmit)="onSave()">
+      <div class="space-y-4">
+        <!-- Title -->
         <div>
-          <label class="font-semibold">Status:</label>
-          <select
-            [(ngModel)]="task.status"
-            (change)="onStatusChange(task.status)"
-            [disabled]="isUpdatingStatus"
-            class="px-2 py-1 border rounded"
-            [class.bg-gray-100]="task.status === 'TODO'"
-            [class.bg-blue-100]="task.status === 'IN_PROGRESS'"
-            [class.bg-green-100]="task.status === 'DONE'"
-          >
-            <option value="TODO">TODO</option>
-            <option value="IN_PROGRESS">IN_PROGRESS</option>
-            <option value="DONE">DONE</option>
-          </select>
+          <label class="font-semibold block mb-1">Title *</label>
+          <input
+            type="text"
+            [(ngModel)]="form.name"
+            name="name"
+            class="w-full px-3 py-2 border rounded"
+            required
+          />
         </div>
 
+        <!-- Description -->
         <div>
-          <label class="font-semibold">Priority:</label>
-          <p>
-            <span class="px-2 py-1 rounded"
-                  [class.bg-red-100]="task.priority === 'HIGH'"
-                  [class.bg-yellow-100]="task.priority === 'MEDIUM'"
-                  [class.bg-green-100]="task.priority === 'LOW'"
+          <label class="font-semibold block mb-1">Description</label>
+          <textarea
+            [(ngModel)]="form.description"
+            name="description"
+            rows="3"
+            class="w-full px-3 py-2 border rounded"
+            placeholder="No description"
+          ></textarea>
+        </div>
+
+        <!-- Grid -->
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="font-semibold block mb-1">Status</label>
+            <select
+              [(ngModel)]="form.status"
+              name="status"
+              class="px-2 py-1 border rounded w-full"
+              [disabled]="isSubmitting"
+              [class.bg-gray-100]="form.status === 'TODO'"
+              [class.bg-blue-100]="form.status === 'IN_PROGRESS'"
+              [class.bg-green-100]="form.status === 'DONE'"
             >
-              {{ task.priority }}
-            </span>
-          </p>
+              <option value="TODO">TODO</option>
+              <option value="IN_PROGRESS">IN_PROGRESS</option>
+              <option value="DONE">DONE</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="font-semibold block mb-1">Priority</label>
+            <select
+              [(ngModel)]="form.priority"
+              name="priority"
+              class="px-2 py-1 border rounded w-full"
+              [disabled]="isSubmitting"
+            >
+              <option value="LOW">LOW</option>
+              <option value="MEDIUM">MEDIUM</option>
+              <option value="HIGH">HIGH</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="font-semibold block mb-1">Due Date</label>
+            <input
+              type="date"
+              [(ngModel)]="form.dueDate"
+              name="dueDate"
+              class="px-2 py-1 border rounded w-full"
+              [disabled]="isSubmitting"
+            />
+          </div>
+
+          <div>
+            <label class="font-semibold block mb-1">End Date</label>
+            <input
+              type="date"
+              [(ngModel)]="form.endDate"
+              name="endDate"
+              class="px-2 py-1 border rounded w-full"
+              [disabled]="isSubmitting"
+            />
+          </div>
+
+          <div class="col-span-2">
+            <label class="font-semibold block mb-1">Project ID</label>
+            <p class="px-2 py-1 border rounded bg-gray-50">{{ task.projectId }}</p>
+          </div>
         </div>
 
+        <!-- Assigned members -->
         <div>
-          <label class="font-semibold">Due Date:</label>
-          <p>{{ task.dueDate || 'No due date' }}</p>
-        </div>
+          <label class="font-semibold block mb-2">
+            Assigned to ({{ selectedMemberIds.size }})
+          </label>
 
-        <div>
-          <label class="font-semibold">Project ID:</label>
-          <p>{{ task.projectId }}</p>
-        </div>
-      </div>
-
-      <div>
-        <label class="font-semibold">Assigned to ({{ assignedMembers.length }}):</label>
-        @if (assignedMembers.length === 0) {
-          <p class="text-gray-500">No one assigned</p>
-        } @else {
-          <ul class="list-disc list-inside">
-            @for (member of assignedMembers; track member.id) {
-              <li>{{ member.user.username }} ({{ member.role }})</li>
+          <div class="max-h-48 overflow-auto border rounded p-3 space-y-2">
+            @if ((allProjectMembers.length || 0) === 0) {
+              <p class="text-sm text-gray-500">No members in this project.</p>
+            } @else {
+              @for (m of allProjectMembers; track m.id) {
+                <label class="flex items-center gap-2 text-sm">
+                  <input
+                    type="checkbox"
+                    [checked]="selectedMemberIds.has(m.id)"
+                    (change)="toggleMember(m.id, $any($event.target).checked)"
+                    [disabled]="isSubmitting"
+                  />
+                  <span>{{ m.user?.username }} <span class="text-gray-400">#{{ m.id }}</span></span>
+                  <span class="ml-auto text-xs rounded px-2 py-0.5 bg-gray-100 text-gray-700">{{ m.role }}</span>
+                </label>
+              }
             }
-          </ul>
-        }
-      </div>
-    </div>
+          </div>
 
-    <div class="mt-6 flex justify-end">
-      <button
-        (click)="onClose()"
-        class="px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700"
-      >
-        Close
-      </button>
-    </div>
+          <div class="mt-2 text-xs text-gray-500">
+            @if ((assignedMembers.length || 0) === 0) {
+              No one assigned
+            } @else {
+              <span>Currently assigned: {{ assignedUsernames }}</span>
+            }
+          </div>
+        </div>
+      </div>
+
+      @if (error) {
+        <div class="mt-4 p-3 bg-red-100 text-red-700 rounded">{{ error }}</div>
+      }
+
+      <div class="mt-6 flex justify-end gap-3">
+        <button
+          type="button"
+          (click)="onClose()"
+          class="px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700"
+          [disabled]="isSubmitting"
+        >
+          Cancel
+        </button>
+        <button
+          type="submit"
+          class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+          [disabled]="isSubmitting"
+        >
+          {{ isSubmitting ? 'Saving...' : 'Save changes' }}
+        </button>
+      </div>
+    </form>
   </div>
 </div>

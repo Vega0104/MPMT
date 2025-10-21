@@ -28,7 +28,8 @@ public class Task {
     @Column(nullable = false)
     private StatusType status;
 
-    @Column(nullable = false)
+    // ⬇️ Verrouille la colonne: non null et non updatable
+    @Column(nullable = false, updatable = false)
     private Long createdBy;
 
     // ---- Relation JPA propre vers Project ----

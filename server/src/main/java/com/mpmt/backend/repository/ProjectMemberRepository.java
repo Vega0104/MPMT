@@ -32,6 +32,7 @@ import java.util.Optional;
 import java.util.List;
 
 public interface ProjectMemberRepository extends JpaRepository<ProjectMember, Long> {
+
     // Requêtes par association (entités)
     List<ProjectMember> findByProject(Project project);
     List<ProjectMember> findByUser(User user);
@@ -41,4 +42,6 @@ public interface ProjectMemberRepository extends JpaRepository<ProjectMember, Lo
     List<ProjectMember> findByProject_Id(Long projectId);
     List<ProjectMember> findByUser_Id(Long userId);
     Optional<ProjectMember> findByUser_IdAndProject_Id(Long userId, Long projectId);
+
+    boolean existsByProject_IdAndUser_Id(Long projectId, Long userId);
 }
