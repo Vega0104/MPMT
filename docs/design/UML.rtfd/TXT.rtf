@@ -1,0 +1,163 @@
+{\rtf1\ansi\ansicpg1252\cocoartf2822
+\cocoatextscaling0\cocoaplatform0{\fonttbl\f0\fswiss\fcharset0 Helvetica;}
+{\colortbl;\red255\green255\blue255;}
+{\*\expandedcolortbl;;}
+\paperw11900\paperh16840\margl1440\margr1440\vieww28600\viewh18000\viewkind0
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural\partightenfactor0
+
+\f0\fs24 \cf0 {{\NeXTGraphic Capture d’écran 2025-07-29 à 17.21.21.png \width11180 \height12360 \appleattachmentpadding0 \appleembedtype0 \appleaqc
+}�}{{\NeXTGraphic Capture d’écran 2025-07-29 à 17.22.10.png \width12540 \height12700 \appleattachmentpadding0 \appleembedtype0 \appleaqc
+}�}\
+\
+Code : \
+@startuml\
+!define Table(x) entity "x" as x\
+!define Relation(x) diamond "x" as x\
+\
+' Entit\'e9s\
+entity "USER" as USER \{\
+  * id : PK\
+  --\
+  username\
+  email\
+  password\
+\}\
+\
+entity "PROJECT" as PROJECT \{\
+  * id : PK\
+  --\
+  name\
+  description\
+  start_date\
+  created_at\
+\}\
+\
+entity "PROJECT_MEMBER" as PROJECT_MEMBER \{\
+  * id : PK\
+  --\
+  user_id : FK\
+  project_id : FK\
+  role\
+\}\
+\
+entity "TASK" as TASK \{\
+  * id : PK\
+  --\
+  project_id : FK\
+  name\
+  description\
+  due_date\
+  end_date\
+  priority\
+  status\
+  created_by : FK\
+\}\
+\
+entity "TASK_ASSIGNMENT" as TASK_ASSIGNMENT \{\
+  * id : PK\
+  --\
+  task_id : FK\
+  project_member_id : FK\
+\}\
+\
+entity "TASK_HISTORY" as TASK_HISTORY \{\
+  * id : PK\
+  --\
+  task_id : FK\
+  changed_by : FK\
+  change_date\
+  change_description\
+\}\
+\
+entity "NOTIFICATION" as NOTIFICATION \{\
+  * id : PK\
+  --\
+  user_id : FK\
+  task_id : FK\
+  content\
+  read\
+  sent_at\
+\}\
+\
+' Associations\
+USER ||--o\{ PROJECT_MEMBER\
+PROJECT ||--o\{ PROJECT_MEMBER\
+PROJECT ||--o\{ TASK\
+TASK ||--o\{ TASK_ASSIGNMENT\
+PROJECT_MEMBER ||--o\{ TASK_ASSIGNMENT\
+TASK ||--o\{ TASK_HISTORY\
+USER ||--o\{ NOTIFICATION\
+TASK ||--o\{ NOTIFICATION\
+@enduml\
+\
+\
+\
+\
+Code 2 :\
+@startuml\
+class User \{\
+  +id: Long\
+  +username: String\
+  +email: String\
+  +password: String\
+\}\
+\
+class Project \{\
+  +id: Long\
+  +name: String\
+  +description: String\
+  +startDate: Date\
+  +createdAt: Date\
+\}\
+\
+class ProjectMember \{\
+  +id: Long\
+  +role: RoleType\
+  +userId: Long\
+  +projectId: Long\
+\}\
+\
+class Task \{\
+  +id: Long\
+  +name: String\
+  +description: String\
+  +dueDate: Date\
+  +endDate: Date\
+  +priority: PriorityType\
+  +status: StatusType\
+  +createdBy: Long\
+  +projectId: Long\
+\}\
+\
+class TaskAssignment \{\
+  +id: Long\
+  +taskId: Long\
+  +projectMemberId: Long\
+\}\
+\
+class TaskHistory \{\
+  +id: Long\
+  +taskId: Long\
+  +changedBy: Long\
+  +changeDate: Date\
+  +changeDescription: String\
+\}\
+\
+class Notification \{\
+  +id: Long\
+  +userId: Long\
+  +taskId: Long\
+  +content: String\
+  +read: Boolean\
+  +sentAt: Date\
+\}\
+\
+User "1" -- "0..*" ProjectMember : membre\
+Project "1" -- "0..*" ProjectMember : membre\
+Project "1" -- "0..*" Task : contient\
+Task "1" -- "0..*" TaskAssignment : assignation\
+ProjectMember "1" -- "0..*" TaskAssignment : assignation\
+Task "1" -- "0..*" TaskHistory : historique\
+User "1" -- "0..*" Notification : re\'e7oit\
+Task "1" -- "0..*" Notification : concerne\
+@enduml}

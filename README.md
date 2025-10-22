@@ -143,4 +143,4 @@ docker compose up -d
 ---
 
 ## ✨ Auteurs
-Projet réalisé par **Gaël El Mokhtari** dans le cadre de l’étude de cas *PMT*.  
+**Gaël El Mokhtari** dans le cadre de l’étude de cas *PMT*.  
