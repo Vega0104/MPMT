@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="fr"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>TaskController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">mpmt-backend</a> &gt; <a href="index.source.html" class="el_package">com.mpmt.backend.controller</a> &gt; <span class="el_source">TaskController.java</span></div><h1>TaskController.java</h1><pre class="source lang-java linenums">package com.mpmt.backend.controller;
+
+import com.mpmt.backend.DTO.StatusUpdateRequest;
+import com.mpmt.backend.entity.StatusType;
+import com.mpmt.backend.entity.Task;
+import com.mpmt.backend.service.TaskService;
+import jakarta.persistence.EntityNotFoundException;
+import jakarta.validation.Valid;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+import java.util.Optional;
+
+@RestController
+@RequestMapping(&quot;/api/tasks&quot;)
+// @CrossOrigin(origins = &quot;*&quot;)
+public class TaskController {
+
+    private final TaskService taskService;
+
+    @Autowired
+<span class="fc" id="L24">    public TaskController(TaskService taskService) {</span>
+<span class="fc" id="L25">        this.taskService = taskService;</span>
+<span class="fc" id="L26">    }</span>
+
+    @GetMapping
+    public List&lt;Task&gt; getAllTasks() {
+<span class="fc" id="L30">        return taskService.getAllTasks();</span>
+    }
+
+    @GetMapping(&quot;/{id}&quot;)
+    public ResponseEntity&lt;Task&gt; getTaskById(@PathVariable Long id) {
+<span class="fc" id="L35">        Optional&lt;Task&gt; task = taskService.getTaskById(id);</span>
+<span class="fc" id="L36">        return task.map(ResponseEntity::ok).orElse(ResponseEntity.notFound().build());</span>
+    }
+
+    @GetMapping(&quot;/by-status&quot;)
+    public ResponseEntity&lt;List&lt;Task&gt;&gt; getTasksByStatus(
+            @RequestParam Long projectId,
+            @RequestParam StatusType status
+    ) {
+<span class="fc" id="L44">        List&lt;Task&gt; tasks = taskService.getTasksByProjectIdAndStatus(projectId, status);</span>
+<span class="fc" id="L45">        return ResponseEntity.ok(tasks);</span>
+    }
+
+    @PostMapping
+    public ResponseEntity&lt;Task&gt; createTask(@RequestBody Task task) {
+<span class="fc" id="L50">        Task created = taskService.createTask(task);</span>
+<span class="fc" id="L51">        return ResponseEntity.ok(created);</span>
+    }
+
+    @DeleteMapping(&quot;/{id}&quot;)
+    public ResponseEntity&lt;Void&gt; deleteTask(@PathVariable Long id) {
+<span class="fc bfc" id="L56" title="All 2 branches covered.">        if (taskService.getTaskById(id).isPresent()) {</span>
+<span class="fc" id="L57">            taskService.deleteTask(id);</span>
+<span class="fc" id="L58">            return ResponseEntity.noContent().build();</span>
+        } else {
+<span class="fc" id="L60">            return ResponseEntity.notFound().build();</span>
+        }
+    }
+
+    /**
+     * PUT idempotent: on confie la fusion au service, qui ne touche ni à createdBy ni à project.
+     * Le service met à jour uniquement les champs non nuls (name, description, status, priority, dueDate, endDate).
+     */
+    @PutMapping(&quot;/{id}&quot;)
+    public ResponseEntity&lt;Task&gt; updateTask(@PathVariable Long id, @RequestBody Task updatedTask) {
+        // 404 si la tâche n'existe pas
+<span class="fc bfc" id="L71" title="All 2 branches covered.">        if (taskService.getTaskById(id).isEmpty()) {</span>
+<span class="fc" id="L72">            return ResponseEntity.notFound().build();</span>
+        }
+
+        // on force l'id depuis l'URL, on ne copie PAS createdBy/project
+<span class="fc" id="L76">        updatedTask.setId(id);</span>
+
+<span class="fc" id="L78">        Task savedTask = taskService.updateTask(updatedTask);</span>
+<span class="fc" id="L79">        return ResponseEntity.ok(savedTask);</span>
+    }
+
+    @PatchMapping(&quot;/{id}/status&quot;)
+    public ResponseEntity&lt;Task&gt; updateStatus(
+            @PathVariable Long id,
+            @RequestBody @Valid StatusUpdateRequest body
+    ) {
+        try {
+<span class="fc" id="L88">            Task updated = taskService.updateTaskStatus(id, body.status());</span>
+<span class="fc" id="L89">            return ResponseEntity.ok(updated);</span>
+<span class="fc" id="L90">        } catch (EntityNotFoundException ex) {</span>
+<span class="fc" id="L91">            return ResponseEntity.notFound().build();</span>
+        }
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

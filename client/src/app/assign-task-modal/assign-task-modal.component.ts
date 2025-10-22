@@ -8,7 +8,7 @@ import { ProjectMemberService, ProjectMember } from '../services/project-member-
   selector: 'app-assign-task-modal',
   standalone: true,
   imports: [CommonModule, FormsModule],
-  templateUrl: './assign-task-modal.component.html'
+  templateUrl: './assign-task-modal.component.html',
 })
 export class AssignTaskModalComponent implements OnInit, OnChanges {
   @Input() taskId!: number;

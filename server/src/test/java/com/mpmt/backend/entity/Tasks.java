@@ -27,8 +27,8 @@ class TaskTest {
         assertThat(task.getDescription()).isEqualTo("Desc test");
         assertThat(task.getDueDate()).isEqualTo(LocalDate.of(2025, 7, 3));
         assertThat(task.getEndDate()).isEqualTo(LocalDate.of(2025, 7, 4));
-        assertThat(task.getPriority()).isEqualTo("HIGH");
-        assertThat(task.getStatus()).isEqualTo("TODO");
+        assertThat(task.getPriority()).isEqualTo(PriorityType.MEDIUM);  // ⬅️ enum, pas String
+        assertThat(task.getStatus()).isEqualTo(StatusType.IN_PROGRESS); // ⬅️ enum, pas String
         assertThat(task.getCreatedBy()).isEqualTo(2L);
         assertThat(task.getProjectId()).isEqualTo(3L);
     }

@@ -1,0 +1,188 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="fr"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>TaskService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">mpmt-backend</a> &gt; <a href="index.source.html" class="el_package">com.mpmt.backend.service</a> &gt; <span class="el_source">TaskService.java</span></div><h1>TaskService.java</h1><pre class="source lang-java linenums">package com.mpmt.backend.service;
+
+import com.mpmt.backend.entity.StatusType;
+import com.mpmt.backend.entity.Task;
+import com.mpmt.backend.entity.TaskHistory;
+import com.mpmt.backend.entity.User; // pour extraire l'id utilisateur courant
+import com.mpmt.backend.repository.TaskRepository;
+import jakarta.persistence.EntityNotFoundException;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+
+import java.util.List;
+import java.util.Optional;
+
+@Service
+public class TaskService {
+
+    private final TaskRepository taskRepository;
+    private final TaskHistoryService taskHistoryService;
+
+    @Autowired
+    public TaskService(TaskRepository taskRepository,
+<span class="fc" id="L26">                       TaskHistoryService taskHistoryService) {</span>
+<span class="fc" id="L27">        this.taskRepository = taskRepository;</span>
+<span class="fc" id="L28">        this.taskHistoryService = taskHistoryService;</span>
+<span class="fc" id="L29">    }</span>
+
+    public List&lt;Task&gt; getAllTasks() {
+<span class="fc" id="L32">        return taskRepository.findAll();</span>
+    }
+
+    public Optional&lt;Task&gt; getTaskById(Long id) {
+<span class="fc" id="L36">        return taskRepository.findById(id);</span>
+    }
+
+    public List&lt;Task&gt; getTasksByProjectId(Long projectId) {
+<span class="fc" id="L40">        return taskRepository.findByProject_Id(projectId);</span>
+    }
+
+    public List&lt;Task&gt; getTasksByProjectIdAndStatus(Long projectId, StatusType status) {
+<span class="fc" id="L44">        return taskRepository.findByProject_IdAndStatus(projectId, status);</span>
+    }
+
+    public Task createTask(Task task) {
+<span class="fc" id="L48">        return taskRepository.save(task);</span>
+    }
+
+    public void deleteTask(Long id) {
+<span class="fc" id="L52">        taskRepository.deleteById(id);</span>
+<span class="fc" id="L53">    }</span>
+
+    /**
+     * Met à jour UNE tâche sans toucher à createdBy ni à project.
+     * Historise les champs effectivement modifiés (une entrée d'historique par PUT).
+     */
+    @Transactional
+    public Task updateTask(Task task) {
+<span class="fc bfc" id="L61" title="All 2 branches covered.">        if (task.getId() == null) {</span>
+<span class="fc" id="L62">            throw new IllegalArgumentException(&quot;Task id must be provided for update&quot;);</span>
+        }
+
+<span class="fc" id="L65">        Task existing = taskRepository.findById(task.getId())</span>
+<span class="fc" id="L66">                .orElseThrow(() -&gt; new EntityNotFoundException(&quot;Task not found: &quot; + task.getId()));</span>
+
+        // --- Snapshot OLD values ---
+<span class="fc" id="L69">        String oldName     = existing.getName();</span>
+<span class="fc" id="L70">        String oldDesc     = existing.getDescription();</span>
+<span class="fc" id="L71">        var    oldPriority = existing.getPriority();</span>
+<span class="fc" id="L72">        var    oldStatus   = existing.getStatus();</span>
+<span class="fc" id="L73">        var    oldDueDate  = existing.getDueDate();</span>
+<span class="fc" id="L74">        var    oldEndDate  = existing.getEndDate();</span>
+
+        // --- Apply NEW values (null explicite accepté pour dates) ---
+<span class="fc bfc" id="L77" title="All 2 branches covered.">        if (task.getName() != null) {</span>
+<span class="fc" id="L78">            existing.setName(task.getName());</span>
+        }
+<span class="fc bfc" id="L80" title="All 2 branches covered.">        if (task.getDescription() != null) {</span>
+<span class="fc" id="L81">            existing.setDescription(task.getDescription());</span>
+        }
+<span class="fc bfc" id="L83" title="All 2 branches covered.">        if (task.getPriority() != null) {</span>
+<span class="fc" id="L84">            existing.setPriority(task.getPriority());</span>
+        }
+<span class="fc bfc" id="L86" title="All 2 branches covered.">        if (task.getStatus() != null) {</span>
+<span class="fc" id="L87">            existing.setStatus(task.getStatus());</span>
+        }
+<span class="pc bpc" id="L89" title="2 of 4 branches missed.">        if (task.getDueDate() != null || isExplicitNull(task.getDueDate())) {</span>
+<span class="fc" id="L90">            existing.setDueDate(task.getDueDate());</span>
+        }
+<span class="pc bpc" id="L92" title="2 of 4 branches missed.">        if (task.getEndDate() != null || isExplicitNull(task.getEndDate())) {</span>
+<span class="fc" id="L93">            existing.setEndDate(task.getEndDate());</span>
+        }
+
+        // ⚠️ ne pas toucher à createdBy / project
+<span class="fc" id="L97">        Task saved = taskRepository.save(existing);</span>
+
+        // --- Compute diff lisible ---
+<span class="fc" id="L100">        StringBuilder summary = new StringBuilder();</span>
+<span class="fc" id="L101">        appendChange(summary, &quot;name&quot;,       oldName,     saved.getName());</span>
+<span class="fc" id="L102">        appendChange(summary, &quot;description&quot;,oldDesc,     saved.getDescription());</span>
+<span class="fc" id="L103">        appendChange(summary, &quot;priority&quot;,   oldPriority, saved.getPriority());</span>
+<span class="fc" id="L104">        appendChange(summary, &quot;status&quot;,     oldStatus,   saved.getStatus());</span>
+<span class="fc" id="L105">        appendChange(summary, &quot;dueDate&quot;,    oldDueDate,  saved.getDueDate());</span>
+<span class="fc" id="L106">        appendChange(summary, &quot;endDate&quot;,    oldEndDate,  saved.getEndDate());</span>
+
+        // Créer l'historique uniquement s'il y a un vrai changement
+<span class="fc bfc" id="L109" title="All 2 branches covered.">        if (summary.length() &gt; 0) {</span>
+<span class="fc" id="L110">            TaskHistory h = new TaskHistory();</span>
+<span class="fc" id="L111">            h.setTaskId(saved.getId());</span>
+<span class="fc" id="L112">            h.setChangedBy(currentUserId()); // peut être null si non dispo</span>
+<span class="fc" id="L113">            h.setChangeDescription(summary.toString());</span>
+<span class="fc" id="L114">            taskHistoryService.createHistory(h);</span>
+        }
+
+<span class="fc" id="L117">        return saved;</span>
+    }
+
+    /**
+     * PATCH /tasks/{id}/status
+     * Historise UNIQUEMENT le changement de statut (ex: &quot;status: TODO -&gt; IN_PROGRESS&quot;).
+     */
+    @Transactional
+    public Task updateTaskStatus(Long id, StatusType newStatus) {
+<span class="fc" id="L126">        Task task = taskRepository.findById(id)</span>
+<span class="fc" id="L127">                .orElseThrow(() -&gt; new EntityNotFoundException(&quot;Task not found: &quot; + id));</span>
+
+<span class="fc bfc" id="L129" title="All 2 branches covered.">        if (task.getStatus() == newStatus) {</span>
+<span class="fc" id="L130">            return task; // pas de changement -&gt; pas d'historique</span>
+        }
+
+<span class="fc" id="L133">        StatusType old = task.getStatus();</span>
+<span class="fc" id="L134">        task.setStatus(newStatus);</span>
+<span class="fc" id="L135">        Task saved = taskRepository.save(task);</span>
+
+<span class="fc" id="L137">        TaskHistory h = new TaskHistory();</span>
+<span class="fc" id="L138">        h.setTaskId(saved.getId());</span>
+<span class="fc" id="L139">        h.setChangedBy(currentUserId());</span>
+<span class="fc" id="L140">        h.setChangeDescription(&quot;status: &quot; + old + &quot; -&gt; &quot; + newStatus);</span>
+<span class="fc" id="L141">        taskHistoryService.createHistory(h);</span>
+
+<span class="fc" id="L143">        return saved;</span>
+    }
+
+    // ----------------- Helpers -----------------
+
+    /** J'accepte le null &quot;volontaire&quot; (utile pour effacer dueDate/endDate). */
+    private boolean isExplicitNull(Object value) {
+<span class="pc bpc" id="L150" title="1 of 2 branches missed.">        return value == null;</span>
+    }
+
+    /** Concatène 'field: old -&gt; new' si différent, avec virgule si besoin. */
+    private void appendChange(StringBuilder sb, String field, Object oldVal, Object newVal) {
+<span class="fc bfc" id="L155" title="All 2 branches covered.">        if (equalsSafe(oldVal, newVal)) return;</span>
+<span class="fc bfc" id="L156" title="All 2 branches covered.">        if (sb.length() &gt; 0) sb.append(&quot;, &quot;);</span>
+<span class="fc" id="L157">        sb.append(field).append(&quot;: &quot;)</span>
+<span class="fc" id="L158">                .append(formatVal(oldVal))</span>
+<span class="fc" id="L159">                .append(&quot; -&gt; &quot;)</span>
+<span class="fc" id="L160">                .append(formatVal(newVal));</span>
+<span class="fc" id="L161">    }</span>
+
+    /** Égalité null-safe. */
+    private boolean equalsSafe(Object a, Object b) {
+<span class="fc bfc" id="L165" title="All 2 branches covered.">        if (a == b) return true;</span>
+<span class="pc bpc" id="L166" title="1 of 4 branches missed.">        if (a == null || b == null) return false;</span>
+<span class="fc" id="L167">        return a.equals(b);</span>
+    }
+
+    /** Mise en forme simple : quotes pour String, sinon toString, null explicite. */
+    private String formatVal(Object v) {
+<span class="fc bfc" id="L172" title="All 2 branches covered.">        if (v == null) return &quot;null&quot;;</span>
+<span class="fc bfc" id="L173" title="All 2 branches covered.">        if (v instanceof String s) return &quot;\&quot;&quot; + s + &quot;\&quot;&quot;;</span>
+<span class="fc" id="L174">        return String.valueOf(v);</span>
+    }
+
+    /** Récupère l'id utilisateur depuis le SecurityContext (si principal est un User). */
+    private Long currentUserId() {
+<span class="fc" id="L179">        Authentication auth = SecurityContextHolder.getContext().getAuthentication();</span>
+<span class="pc bpc" id="L180" title="1 of 2 branches missed.">        if (auth == null) return null;</span>
+<span class="fc" id="L181">        Object principal = auth.getPrincipal();</span>
+<span class="pc bpc" id="L182" title="1 of 2 branches missed.">        if (principal instanceof User u) {</span>
+<span class="fc" id="L183">            return u.getId();</span>
+        }
+<span class="nc" id="L185">        return null;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

@@ -1,5 +1,5 @@
 // src/main/java/com/mpmt/backend/dto/UpdateTaskRequest.java
-package com.mpmt.backend.dto;
+package com.mpmt.backend.DTO;
 
 import com.mpmt.backend.entity.PriorityType;
 import com.mpmt.backend.entity.StatusType;

@@ -26,6 +26,8 @@ public class Project {
     @Temporal(TemporalType.TIMESTAMP)
     private Date createdAt = new Date();
 
+    private Long createdBy;
+
     // Cascade & orphanRemoval vers les membres
     @JsonIgnore
     @OneToMany(mappedBy = "project", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
@@ -56,4 +58,12 @@ public class Project {
 
     public List<Task> getTasks() { return tasks; }
     public void setTasks(List<Task> tasks) { this.tasks = tasks; }
+
+    public Long getCreatedBy() {
+        return createdBy;
+    }
+
+    public void setCreatedBy(Long createdBy) {
+        this.createdBy = createdBy;
+    }
 }

@@ -13,6 +13,7 @@ import { filter } from 'rxjs/operators';
 })
 export class AppComponent implements OnInit {
   showHomeButton = false;
+  title = 'temp-front';
 
   constructor(private router: Router) {}
 

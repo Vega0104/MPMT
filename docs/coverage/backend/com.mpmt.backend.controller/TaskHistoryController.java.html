@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="fr"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>TaskHistoryController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">mpmt-backend</a> &gt; <a href="index.source.html" class="el_package">com.mpmt.backend.controller</a> &gt; <span class="el_source">TaskHistoryController.java</span></div><h1>TaskHistoryController.java</h1><pre class="source lang-java linenums">package com.mpmt.backend.controller;
+
+import com.mpmt.backend.entity.TaskHistory;
+import com.mpmt.backend.service.TaskHistoryService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+@RestController
+@RequestMapping(&quot;/api&quot;)
+// @CrossOrigin(origins = &quot;*&quot;)
+public class TaskHistoryController {
+
+    private final TaskHistoryService service;
+
+    @Autowired
+<span class="fc" id="L20">    public TaskHistoryController(TaskHistoryService service) {</span>
+<span class="fc" id="L21">        this.service = service;</span>
+<span class="fc" id="L22">    }</span>
+
+    /**
+     * ✅ Route attendue par le front:
+     * GET /api/tasks/{taskId}/history
+     * Protégée: accessible si l'utilisateur a accès à la tâche (ADMIN/MEMBER/OBSERVER du projet).
+     */
+    @GetMapping(&quot;/tasks/{taskId}/history&quot;)
+    @PreAuthorize(&quot;@taskSecurity.canAccessTask(#taskId)&quot;)
+    public List&lt;TaskHistory&gt; getHistoryForTask(@PathVariable(&quot;taskId&quot;) Long taskId) {
+<span class="nc" id="L32">        return service.getHistoriesByTaskId(taskId);</span>
+    }
+
+    /**
+     * RESTful (ta version initiale, conservée pour compat)
+     * GET /api/tasks/{taskId}/histories
+     */
+    @GetMapping(&quot;/tasks/{taskId}/histories&quot;)
+    @PreAuthorize(&quot;@taskSecurity.canAccessTask(#taskId)&quot;)
+    public ResponseEntity&lt;List&lt;TaskHistory&gt;&gt; getHistoriesForTask(@PathVariable(&quot;taskId&quot;) Long taskId) {
+<span class="nc" id="L42">        List&lt;TaskHistory&gt; histories = service.getHistoriesByTaskId(taskId);</span>
+<span class="nc" id="L43">        return ResponseEntity.ok(histories);</span>
+    }
+
+    // ------- Legacy endpoints pour compatibilité -------
+
+    // GET /api/task-histories
+    @GetMapping(&quot;/task-histories&quot;)
+    @PreAuthorize(&quot;isAuthenticated()&quot;)
+    public List&lt;TaskHistory&gt; getAllHistories() {
+<span class="nc" id="L52">        return service.getAllHistories();</span>
+    }
+
+    // GET /api/task-histories/{id}
+    @GetMapping(&quot;/task-histories/{id}&quot;)
+    @PreAuthorize(&quot;isAuthenticated()&quot;)
+    public ResponseEntity&lt;TaskHistory&gt; getHistoryById(@PathVariable Long id) {
+<span class="nc" id="L59">        return service.getHistoryById(id)</span>
+<span class="nc" id="L60">                .map(ResponseEntity::ok)</span>
+<span class="nc" id="L61">                .orElse(ResponseEntity.notFound().build());</span>
+    }
+
+    // GET /api/task-histories/by-task/{taskId}
+    @GetMapping(&quot;/task-histories/by-task/{taskId}&quot;)
+    @PreAuthorize(&quot;@taskSecurity.canAccessTask(#taskId)&quot;)
+    public List&lt;TaskHistory&gt; getHistoriesByTaskId(@PathVariable(&quot;taskId&quot;) Long taskId) {
+<span class="nc" id="L68">        return service.getHistoriesByTaskId(taskId);</span>
+    }
+
+    // POST /api/task-histories
+    @PostMapping(&quot;/task-histories&quot;)
+    @PreAuthorize(&quot;hasRole('ADMIN') or hasRole('MEMBER')&quot;)
+    public ResponseEntity&lt;TaskHistory&gt; createHistory(@RequestBody TaskHistory taskHistory) {
+<span class="nc" id="L75">        return ResponseEntity.ok(service.createHistory(taskHistory));</span>
+    }
+
+    // DELETE /api/task-histories/{id}
+    @DeleteMapping(&quot;/task-histories/{id}&quot;)
+    @PreAuthorize(&quot;hasRole('ADMIN')&quot;)
+    public ResponseEntity&lt;Void&gt; deleteHistory(@PathVariable Long id) {
+<span class="nc" id="L82">        service.deleteHistory(id);</span>
+<span class="nc" id="L83">        return ResponseEntity.noContent().build();</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

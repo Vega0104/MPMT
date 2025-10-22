@@ -1,0 +1,179 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="fr"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ProjectController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">mpmt-backend</a> &gt; <a href="index.source.html" class="el_package">com.mpmt.backend.controller</a> &gt; <span class="el_source">ProjectController.java</span></div><h1>ProjectController.java</h1><pre class="source lang-java linenums">// java
+package com.mpmt.backend.controller;
+
+import com.mpmt.backend.DTO.CreateProjectRequest;
+import com.mpmt.backend.DTO.ProjectStats;
+import com.mpmt.backend.DTO.ProjectSummary;
+import com.mpmt.backend.entity.*;
+import com.mpmt.backend.security.ProjectSecurity;
+import com.mpmt.backend.service.ProjectMemberService;
+import com.mpmt.backend.service.ProjectService;
+import com.mpmt.backend.service.TaskService;
+import com.mpmt.backend.service.UserService;
+import jakarta.validation.Valid;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.Date;
+import java.util.List;
+import java.util.Optional;
+
+@RestController
+@RequestMapping(&quot;/api/projects&quot;)
+public class ProjectController {
+
+    private final ProjectService projectService;
+    private final ProjectMemberService projectMemberService;
+    private final TaskService taskService;
+    private final UserService userService;
+    private final ProjectSecurity projectSecurity;
+
+    @Autowired
+    public ProjectController(
+            ProjectService projectService,
+            ProjectMemberService projectMemberService,
+            TaskService taskService,
+            UserService userService,
+            ProjectSecurity projectSecurity
+<span class="fc" id="L41">    ) {</span>
+<span class="fc" id="L42">        this.projectService = projectService;</span>
+<span class="fc" id="L43">        this.projectMemberService = projectMemberService;</span>
+<span class="fc" id="L44">        this.taskService = taskService;</span>
+<span class="fc" id="L45">        this.userService = userService;</span>
+<span class="fc" id="L46">        this.projectSecurity = projectSecurity;</span>
+<span class="fc" id="L47">    }</span>
+
+    @GetMapping(&quot;/{id}&quot;)
+    public ResponseEntity&lt;Project&gt; getProjectById(@PathVariable Long id) {
+<span class="fc" id="L51">        return projectService.getProjectById(id)</span>
+<span class="fc" id="L52">                .map(ResponseEntity::ok)</span>
+<span class="fc" id="L53">                .orElseGet(() -&gt; ResponseEntity.notFound().&lt;Project&gt;build());</span>
+    }
+
+    @GetMapping(&quot;/by-name/{name}&quot;)
+    public ResponseEntity&lt;Project&gt; getProjectByName(@PathVariable String name) {
+<span class="fc" id="L58">        return projectService.getProjectByName(name)</span>
+<span class="fc" id="L59">                .map(ResponseEntity::ok)</span>
+<span class="fc" id="L60">                .orElse(ResponseEntity.notFound().build());</span>
+    }
+
+    @GetMapping
+    public List&lt;ProjectSummary&gt; getAllProjects() {
+<span class="fc" id="L65">        return projectService.getAllProjects().stream()</span>
+<span class="fc" id="L66">                .map(p -&gt; new ProjectSummary(</span>
+<span class="fc" id="L67">                        p.getId(),</span>
+<span class="fc" id="L68">                        p.getName(),</span>
+<span class="fc" id="L69">                        p.getDescription(),</span>
+<span class="fc" id="L70">                        p.getStartDate(),</span>
+<span class="fc" id="L71">                        p.getCreatedAt()</span>
+                ))
+<span class="fc" id="L73">                .toList();</span>
+    }
+
+    @PostMapping
+    public ResponseEntity&lt;Object&gt; createProject(
+            @RequestBody @Valid CreateProjectRequest request,
+            Authentication authentication
+    ) {
+<span class="fc" id="L81">        Project project = new Project();</span>
+<span class="fc" id="L82">        project.setName(request.getName());</span>
+<span class="fc" id="L83">        project.setDescription(request.getDescription());</span>
+<span class="fc" id="L84">        project.setStartDate(request.getStartDate());</span>
+
+<span class="fc" id="L86">        Project createdProject = projectService.createProject(project);</span>
+
+<span class="fc" id="L88">        var auth = SecurityContextHolder.getContext().getAuthentication();</span>
+<span class="fc" id="L89">        Object principal = auth.getPrincipal();</span>
+<span class="pc bpc" id="L90" title="1 of 2 branches missed.">        if (!(principal instanceof User creator)) {</span>
+<span class="nc" id="L91">            throw new RuntimeException(&quot;Authenticated principal is not a User&quot;);</span>
+        }
+
+<span class="fc" id="L94">        ProjectMember adminMember = new ProjectMember();</span>
+<span class="fc" id="L95">        adminMember.setProjectId(createdProject.getId());</span>
+<span class="fc" id="L96">        adminMember.setUserId(creator.getId());</span>
+<span class="fc" id="L97">        adminMember.setRole(RoleType.ADMIN);</span>
+<span class="fc" id="L98">        adminMember.setJoinedAt(new Date());</span>
+
+<span class="fc" id="L100">        projectMemberService.createMember(adminMember);</span>
+
+<span class="fc" id="L102">        return ResponseEntity.ok(createdProject);</span>
+    }
+
+    @DeleteMapping(&quot;/{id}&quot;)
+    public ResponseEntity&lt;Void&gt; deleteProject(@PathVariable Long id, Authentication authentication) {
+<span class="fc bfc" id="L107" title="All 2 branches covered.">        if (!projectSecurity.canDeleteProject(id, authentication)) {</span>
+<span class="fc" id="L108">            return ResponseEntity.status(403).build();</span>
+        }
+<span class="fc bfc" id="L110" title="All 2 branches covered.">        if (projectService.getProjectById(id).isEmpty()) {</span>
+<span class="fc" id="L111">            return ResponseEntity.notFound().build();</span>
+        }
+<span class="fc" id="L113">        projectService.deleteProject(id);</span>
+<span class="fc" id="L114">        return ResponseEntity.noContent().build();</span>
+    }
+
+    @GetMapping(&quot;/{id}/members&quot;)
+    public ResponseEntity&lt;List&lt;ProjectMember&gt;&gt; getMembersForProject(@PathVariable Long id) {
+<span class="fc" id="L119">        List&lt;ProjectMember&gt; members = projectMemberService.findMembersByProjectId(id);</span>
+<span class="fc" id="L120">        return ResponseEntity.ok(members);</span>
+    }
+
+    @GetMapping(&quot;/{id}/tasks&quot;)
+    public ResponseEntity&lt;List&lt;Task&gt;&gt; getTasksForProject(@PathVariable Long id) {
+<span class="fc" id="L125">        List&lt;Task&gt; tasks = taskService.getTasksByProjectId(id);</span>
+<span class="fc" id="L126">        return ResponseEntity.ok(tasks);</span>
+    }
+
+    @GetMapping(&quot;/{id}/stats&quot;)
+    public ResponseEntity&lt;ProjectStats&gt; getProjectStats(@PathVariable Long id) {
+<span class="fc" id="L131">        List&lt;Task&gt; tasks = taskService.getTasksByProjectId(id);</span>
+
+<span class="pc bpc" id="L133" title="1 of 2 branches missed.">        if (tasks.isEmpty()) {</span>
+<span class="fc" id="L134">            ProjectStats emptyStats = new ProjectStats();</span>
+<span class="fc" id="L135">            emptyStats.setTotalTasks(0);</span>
+<span class="fc" id="L136">            emptyStats.setProgress(0);</span>
+<span class="fc" id="L137">            return ResponseEntity.ok(emptyStats);</span>
+        }
+
+<span class="nc bnc" id="L140" title="All 2 branches missed.">        long todo = tasks.stream().filter(t -&gt; t.getStatus() == StatusType.TODO).count();</span>
+<span class="nc bnc" id="L141" title="All 2 branches missed.">        long inProgress = tasks.stream().filter(t -&gt; t.getStatus() == StatusType.IN_PROGRESS).count();</span>
+<span class="nc bnc" id="L142" title="All 2 branches missed.">        long done = tasks.stream().filter(t -&gt; t.getStatus() == StatusType.DONE).count();</span>
+
+<span class="nc" id="L144">        ProjectStats stats = new ProjectStats();</span>
+<span class="nc" id="L145">        stats.setTotalTasks(tasks.size());</span>
+<span class="nc" id="L146">        stats.setTodoCount(todo);</span>
+<span class="nc" id="L147">        stats.setInProgressCount(inProgress);</span>
+<span class="nc" id="L148">        stats.setDoneCount(done);</span>
+<span class="nc" id="L149">        stats.setProgress((int) ((done * 100.0) / tasks.size()));</span>
+
+<span class="nc" id="L151">        return ResponseEntity.ok(stats);</span>
+    }
+
+    @PostMapping(&quot;/{id}/tasks&quot;)
+    public ResponseEntity&lt;Task&gt; createTaskForProject(@PathVariable Long id, @RequestBody Task task) {
+<span class="fc bfc" id="L156" title="All 2 branches covered.">        if (projectService.getProjectById(id).isEmpty()) {</span>
+<span class="fc" id="L157">            return ResponseEntity.notFound().build();</span>
+        }
+<span class="fc" id="L159">        task.setProjectId(id);</span>
+<span class="fc" id="L160">        Task created = taskService.createTask(task);</span>
+<span class="fc" id="L161">        return ResponseEntity.ok(created);</span>
+    }
+
+    @PutMapping(&quot;/{id}&quot;)
+    public ResponseEntity&lt;Project&gt; updateProject(@PathVariable Long id, @RequestBody Project updatedProject) {
+<span class="fc" id="L166">        Optional&lt;Project&gt; optionalProject = projectService.getProjectById(id);</span>
+<span class="fc bfc" id="L167" title="All 2 branches covered.">        if (optionalProject.isEmpty()) {</span>
+<span class="fc" id="L168">            return ResponseEntity.notFound().build();</span>
+        }
+<span class="fc" id="L170">        Project existingProject = optionalProject.get();</span>
+<span class="fc" id="L171">        existingProject.setName(updatedProject.getName());</span>
+<span class="fc" id="L172">        existingProject.setDescription(updatedProject.getDescription());</span>
+<span class="fc" id="L173">        existingProject.setStartDate(updatedProject.getStartDate());</span>
+
+<span class="fc" id="L175">        Project savedProject = projectService.updateProject(existingProject);</span>
+<span class="fc" id="L176">        return ResponseEntity.ok(savedProject);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

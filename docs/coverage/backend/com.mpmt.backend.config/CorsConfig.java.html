@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="fr"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>CorsConfig.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">mpmt-backend</a> &gt; <a href="index.source.html" class="el_package">com.mpmt.backend.config</a> &gt; <span class="el_source">CorsConfig.java</span></div><h1>CorsConfig.java</h1><pre class="source lang-java linenums">////package com.mpmt.backend.config;
+////
+////import org.springframework.context.annotation.Bean;
+////import org.springframework.context.annotation.Configuration;
+////import org.springframework.web.servlet.config.annotation.CorsRegistry;
+////import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+////
+////@Configuration
+////public class CorsConfig {
+////    @Bean
+////    public WebMvcConfigurer corsConfigurer() {
+////        return new WebMvcConfigurer() {
+////            @Override
+////            public void addCorsMappings(CorsRegistry registry) {
+////                registry.addMapping(&quot;/**&quot;)
+////                        .allowedOrigins(
+////                        &quot;http://localhost:8080&quot;,
+////                        &quot;http://127.0.0.1:8080&quot; )
+////                        .allowedMethods(&quot;GET&quot;, &quot;POST&quot;, &quot;PUT&quot;, &quot;DELETE&quot;, &quot;PATCH&quot;, &quot;OPTIONS&quot;)
+////                        .allowedHeaders(&quot;*&quot;)
+////                        .allowCredentials(true);
+////            }
+////        };
+////    }
+////}
+//
+//
+//// src/main/java/com/mpmt/backend/config/CorsConfig.java
+//package com.mpmt.backend.config;
+//
+//import org.springframework.boot.web.servlet.FilterRegistrationBean;
+//import org.springframework.context.annotation.Bean;
+//import org.springframework.context.annotation.Configuration;
+//import org.springframework.core.Ordered;
+//import org.springframework.web.cors.CorsConfiguration;
+//import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+//import org.springframework.web.filter.CorsFilter;
+//
+//import java.util.List;
+//
+//@Configuration
+//public class CorsConfig {
+//
+//    @Bean
+//    public FilterRegistrationBean&lt;CorsFilter&gt; corsFilterRegistration() {
+//        CorsConfiguration cfg = new CorsConfiguration();
+//        cfg.setAllowedOrigins(List.of(&quot;http://localhost:8080&quot;, &quot;http://localhost:4200&quot;));
+//        cfg.setAllowedMethods(List.of(&quot;GET&quot;,&quot;POST&quot;,&quot;PUT&quot;,&quot;PATCH&quot;,&quot;DELETE&quot;,&quot;OPTIONS&quot;));
+//        cfg.setAllowedHeaders(List.of(&quot;*&quot;));      // authorization, content-type, etc.
+//        cfg.setExposedHeaders(List.of(&quot;*&quot;));
+//        cfg.setAllowCredentials(true);
+//        cfg.setMaxAge(3600L);
+//
+//        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+//        source.registerCorsConfiguration(&quot;/**&quot;, cfg);
+//
+//        FilterRegistrationBean&lt;CorsFilter&gt; bean = new FilterRegistrationBean&lt;&gt;(new CorsFilter(source));
+//        bean.setOrder(Ordered.HIGHEST_PRECEDENCE); // ⬅️ très important: AVANT JwtAuthFilter
+//        return bean;
+//    }
+//}
+//
+
+
+package com.mpmt.backend.config;
+
+import org.springframework.boot.web.servlet.FilterRegistrationBean;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.core.Ordered;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.web.filter.CorsFilter;
+
+import java.util.Arrays;
+
+@Configuration
+<span class="fc" id="L78">public class CorsConfig {</span>
+
+    @Bean
+    public FilterRegistrationBean&lt;CorsFilter&gt; corsFilterRegistration() {
+<span class="fc" id="L82">        CorsConfiguration cfg = new CorsConfiguration();</span>
+
+        // Origines autorisées (ajoutez toutes les origines nécessaires)
+<span class="fc" id="L85">        cfg.setAllowedOrigins(Arrays.asList(</span>
+                &quot;http://localhost:8080&quot;,
+                &quot;http://localhost:4200&quot;,
+                &quot;http://127.0.0.1:8080&quot;,
+                &quot;http://127.0.0.1:4200&quot;
+        ));
+
+        // Méthodes HTTP autorisées
+<span class="fc" id="L93">        cfg.setAllowedMethods(Arrays.asList(</span>
+                &quot;GET&quot;, &quot;POST&quot;, &quot;PUT&quot;, &quot;PATCH&quot;, &quot;DELETE&quot;, &quot;OPTIONS&quot;, &quot;HEAD&quot;
+        ));
+
+        // Headers autorisés (tous les headers)
+<span class="fc" id="L98">        cfg.setAllowedHeaders(Arrays.asList(&quot;*&quot;));</span>
+
+        // Headers exposés au client JavaScript
+<span class="fc" id="L101">        cfg.setExposedHeaders(Arrays.asList(</span>
+                &quot;Authorization&quot;,
+                &quot;Content-Type&quot;,
+                &quot;Accept&quot;,
+                &quot;X-Requested-With&quot;,
+                &quot;remember-me&quot;,
+                &quot;X-Total-Count&quot;,
+                &quot;X-Page-Number&quot;,
+                &quot;X-Page-Size&quot;
+        ));
+
+        // Autoriser l'envoi de credentials (cookies, authorization headers)
+<span class="fc" id="L113">        cfg.setAllowCredentials(true);</span>
+
+        // Durée de cache pour les requêtes preflight (1 heure)
+<span class="fc" id="L116">        cfg.setMaxAge(3600L);</span>
+
+        // Configuration de la source
+<span class="fc" id="L119">        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();</span>
+<span class="fc" id="L120">        source.registerCorsConfiguration(&quot;/**&quot;, cfg);</span>
+
+        // Création du filtre avec la plus haute priorité
+<span class="fc" id="L123">        FilterRegistrationBean&lt;CorsFilter&gt; bean = new FilterRegistrationBean&lt;&gt;(new CorsFilter(source));</span>
+<span class="fc" id="L124">        bean.setOrder(Ordered.HIGHEST_PRECEDENCE); // CRUCIAL: doit s'exécuter AVANT JwtAuthFilter</span>
+
+<span class="fc" id="L126">        return bean;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

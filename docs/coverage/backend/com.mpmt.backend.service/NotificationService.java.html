@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="fr"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>NotificationService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">mpmt-backend</a> &gt; <a href="index.source.html" class="el_package">com.mpmt.backend.service</a> &gt; <span class="el_source">NotificationService.java</span></div><h1>NotificationService.java</h1><pre class="source lang-java linenums">package com.mpmt.backend.service;
+
+import com.mpmt.backend.entity.Notification;
+import com.mpmt.backend.repository.NotificationRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.Optional;
+
+@Service
+public class NotificationService {
+
+    private final NotificationRepository notificationRepository;
+
+    @Autowired
+<span class="fc" id="L17">    public NotificationService(NotificationRepository notificationRepository) {</span>
+<span class="fc" id="L18">        this.notificationRepository = notificationRepository;</span>
+<span class="fc" id="L19">    }</span>
+
+    public List&lt;Notification&gt; getAllNotifications() {
+<span class="fc" id="L22">        return notificationRepository.findAll();</span>
+    }
+
+    public Optional&lt;Notification&gt; getNotificationById(Long id) {
+<span class="nc" id="L26">        return notificationRepository.findById(id);</span>
+    }
+
+    public List&lt;Notification&gt; getByUserId(Long userId) {
+<span class="nc" id="L30">        return notificationRepository.findByUserId(userId);</span>
+    }
+
+    public List&lt;Notification&gt; getUnreadByUserId(Long userId) {
+<span class="nc" id="L34">        return notificationRepository.findByUserIdAndReadFalse(userId);</span>
+    }
+
+    public Notification createNotification(Notification notification) {
+<span class="fc" id="L38">        return notificationRepository.save(notification);</span>
+    }
+
+    public void markAsRead(Long id) {
+<span class="fc" id="L42">        Optional&lt;Notification&gt; notif = notificationRepository.findById(id);</span>
+<span class="fc" id="L43">        notif.ifPresent(n -&gt; {</span>
+<span class="fc" id="L44">            n.setRead(true);</span>
+<span class="fc" id="L45">            notificationRepository.save(n);</span>
+<span class="fc" id="L46">        });</span>
+<span class="fc" id="L47">    }</span>
+
+    public void deleteNotification(Long id) {
+<span class="nc" id="L50">        notificationRepository.deleteById(id);</span>
+<span class="nc" id="L51">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
