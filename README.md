@@ -115,7 +115,7 @@ Une pipeline **GitHub Actions** est configurée (`.github/workflows/ci.yml`) :
 
 ---
 
-## 📦 Déploiement Docker
+## Déploiement Docker
 
 ### Images disponibles
 - **Backend** : `gaelem/mpmt-backend:latest`
@@ -130,17 +130,17 @@ docker compose up -d
 
 ---
 
-## 📝 Livrables
-- ✅ Schéma de la base de données (MCD/UML, `docs/`)
+## Livrables
+- ✅ Schéma de la base de données (MCD/UML, `docs/design`)
 - ✅ Scripts SQL (`schema.sql`, `reset.sql`, `demo-data.sql`)
 - ✅ Repository GitHub avec frontend & backend
 - ✅ Rapports de couverture (JaCoCo + Jest)
 - ✅ Dockerfiles (frontend & backend)
 - ✅ docker-compose.yml
-- ✅ CI/CD (GitHub Actions)
+- ✅ CI/CD (.github/workflows/ci.yml)
 - ✅ README.md (ce fichier)
 
 ---
 
-## ✨ Auteurs
+## Auteur
 **Gaël El Mokhtari** dans le cadre de l’étude de cas *PMT*.  
