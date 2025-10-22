@@ -17,6 +17,14 @@ services:
       timeout: 3s
       retries: 20
 
+  mailhog:
+    image: mailhog/mailhog:latest
+    container_name: mpmt-mailhog
+    restart: unless-stopped
+    ports:
+      - "1025:1025"   # SMTP
+      - "8025:8025"   # UI Web -> http://localhost:8025
+
   backend:
     build:
       context: ./server
@@ -30,7 +38,25 @@ services:
       SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/${POSTGRES_DB:-mpmt}
       SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-postgres}
       SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+
+      # Port backend
       SERVER_PORT: ${BACKEND_PORT:-8081}
+
+      # URL du front injectée dans Spring (app.frontend.base-url)
+      APP_FRONTEND_BASE_URL: http://localhost:${FRONTEND_PORT_HOST:-8080}
+
+      # ========= SendGrid SMTP relay (réel) =========
+      SPRING_MAIL_HOST: smtp.sendgrid.net
+      SPRING_MAIL_PORT: 587
+      SPRING_MAIL_USERNAME: apikey                       # littéralement "apikey"
+      SPRING_MAIL_PASSWORD: ${SENDGRID_API_KEY}          # définis dans .env
+      SPRING_MAIL_PROPERTIES_MAIL_SMTP_AUTH: "true"
+      SPRING_MAIL_PROPERTIES_MAIL_SMTP_STARTTLS_ENABLE: "true"
+
+      # Adresse expéditeur (Single Sender SendGrid vérifié)
+      APP_MAIL_FROM: ${APP_MAIL_FROM}
+
+      SPRING_PROFILES_ACTIVE: dev
     ports:
       - "${BACKEND_PORT_HOST:-8081}:${BACKEND_PORT:-8081}"
 

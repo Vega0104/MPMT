@@ -15,6 +15,8 @@ public class Task {
     @Column(nullable = false)
     private String name;
 
+    private String title;
+
     private String description;
 
     private LocalDate dueDate;
@@ -65,6 +67,15 @@ public class Task {
 
     public Project getProject() { return project; }
     public void setProject(Project project) { this.project = project; }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
 
     // ====== Compat API : expose projectId ======
     @JsonProperty("projectId")

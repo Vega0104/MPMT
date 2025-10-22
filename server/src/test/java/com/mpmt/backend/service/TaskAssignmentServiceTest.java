@@ -1,6 +1,8 @@
+// java
 package com.mpmt.backend.service;
 
 import com.mpmt.backend.entity.TaskAssignment;
+import com.mpmt.backend.mail.MailService;
 import com.mpmt.backend.repository.TaskAssignmentRepository;
 import com.mpmt.backend.repository.ProjectMemberRepository;
 import com.mpmt.backend.repository.TaskRepository;
@@ -18,20 +20,21 @@ class TaskAssignmentServiceTest {
     private TaskAssignmentRepository taskAssignmentRepository;
     private ProjectMemberRepository projectMemberRepository;
     private TaskRepository taskRepository;
+    private MailService mailService;
     private TaskAssignmentService service;
 
     @BeforeEach
     void setUp() {
-        // Mock ALL required repositories
         taskAssignmentRepository = Mockito.mock(TaskAssignmentRepository.class);
         projectMemberRepository = Mockito.mock(ProjectMemberRepository.class);
         taskRepository = Mockito.mock(TaskRepository.class);
+        mailService = Mockito.mock(MailService.class); // mock ajouté
 
-        // Pass all mocks to the service constructor
         service = new TaskAssignmentService(
                 taskAssignmentRepository,
                 projectMemberRepository,
-                taskRepository
+                taskRepository,
+                mailService // passé au constructeur
         );
     }
 
